@@ -1,0 +1,11 @@
+.gradle/
+gradle/
+gradlew
+gradlew.bat
+build/
+out/
+*.ipr
+*.iml
+*.iws
+config.properties
+deploy.sh

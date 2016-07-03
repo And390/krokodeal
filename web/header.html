@@ -1,0 +1,57 @@
+      <!-- Page Header-->
+      <!--
+      ---------------------------------------------------------------+
+      ".navbar" Helper Classes:
+      -------------------------------------------------------------------+
+      * Positioning Classes:
+      '.navbar-static-top' - Static top positioned navbar
+      '.navbar-static-top' - Fixed top positioned navbar
+      * Available Skin Classes:
+      .bg-dark    .bg-primary   .bg-success
+      .bg-info    .bg-warning   .bg-danger
+      .bg-alert   .bg-system
+      -------------------------------------------------------------------+
+      Example: <header class="navbar navbar-fixed-top bg-primary">
+      Results: Fixed top navbar with primary background
+      -----------------------------------------------------------------
+      -->
+      <!-- Start: Header-->
+      <header class="navbar undefined">
+        <div class="navbar-branding"><span class="navbar-brand text-uppercase">Kroko-deal</span><span id="toggle_sidemenu_l" class="fa fa-bars"></span></div>
+        <ul class="nav navbar-nav navbar-left"></ul>
+        <ul class="nav navbar-nav navbar-right">
+          <li><img src="/assets/img/avatars/1.jpg" alt="avatar"></li>
+          <li class="dropdown menu-merge"><a href="#" data-toggle="dropdown" class="dropdown-toggle fw600 p15"><span class="fa fa-angle-down"></span> </a>
+            <ul role="menu" class="dropdown-menu list-group dropdown-persist w250">
+              <$  if (user && user.role.name()=="MASTER")  {  $>
+              <li class="list-group-item"><a href="/profile" class="animated animated-short fadeInUp"><span class="fa fa-gear"></span> О себе</a></li>
+              <$  }  $>
+              <li class="dropdown-footer"><a id="logout" href="#"><span class="fa fa-power-off pr5"></span> Выйти</a></li>
+            </ul>
+          </li>
+        </ul>
+      </header>
+      <!-- Start: Sidebar-->
+      <aside id="sidebar_left" class="nano nano-light affix">
+        <!-- Start: Sidebar Left Content-->
+        <div class="sidebar-left-content nano-content">
+          <ul class="nav sidebar-menu">
+            <li class="sidebar-label pt35"></li>
+            <$  if (user && user.role.name()=="MASTER")  {  $>
+            <li><a href="/profile"><span class="fa fa-gears"></span><span class="sidebar-title">О себе</span></a></li>
+            <li><a href="/tasks/open"><span class="glyphicon glyphicon-check"></span><span class="sidebar-title">Задачи</span></a></li>
+            <li><a href="/tasks/confirm"><span class="fa fa-shopping-basket"></span><span class="sidebar-title">Финансы</span></a></li>
+            <li><a href="/faq"><span class="fa fa-wechat"></span><span class="sidebar-title">FAQ</span></a></li>
+            <li><a href="/feedback"><span class="fa fa-comment-o"></span><span class="sidebar-title">Обратная связь</span></a></li>
+            <$  }  $>
+            <$  if (user && user.role.name()=="ADMIN")  {  $>
+            <li><a href="/tasks/create"><span class="glyphicon glyphicon-edit"></span><span class="sidebar-title">Создание задачи</span></a></li>
+            <li><a href="/tasks/all"><span class="glyphicon glyphicon-share"></span><span class="sidebar-title">Все задачи</span></a></li>
+            <li><a href="/tasks/master"><span class="glyphicon glyphicon-check"></span><span class="sidebar-title">Задачи мастеров</span></a></li>
+            <li><a href="/statistics"><span class="fa fa-bar-chart"></span><span class="sidebar-title">Статистика</span></a></li>
+            <$  }  $>
+          </ul>
+          <!-- Start: Sidebar Collapse Button-->
+          <div class="sidebar-toggle-mini"><a href="#"><span class="fa fa-sign-out"></span></a></div>
+        </div>
+      </aside>

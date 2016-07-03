@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <!-- Site Title-->
+    <meta charset="UTF-8">
+    <title>${task ? "Редактирование" : "Создание"} задачи</title>
+    <meta name="format-detection" content="telephone=no">
+    <meta name="viewport"
+          content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <link rel="icon" href="/assets/img/favicon.ico" type="image/x-icon">
+    <!-- Stylesheets-->
+    <link rel="stylesheet" type="text/css"
+          href="//fonts.googleapis.com/css?family=Lato:300,400,600,700%7CMontserrat:400,700">
+    <link rel="stylesheet" type="text/css" href="/assets/skin/default_skin/css/theme.css">
+    <link rel="stylesheet" type="text/css" href="/css/custom.css">
+    <!--[if lt IE 10]>
+    <div style="background: #212121; padding: 10px 0; box-shadow: 3px 3px 5px 0 rgba(0,0,0,.3); clear: both; text-align:center; position: relative; z-index:1;">
+        <a href="http://windows.microsoft.com/en-US/internet-explorer/"><img
+                src="/images/ie8-panel/warning_bar_0000_us.jpg" border="0" height="42" width="820"
+                alt="You are using an outdated browser. For a faster, safer browsing experience, upgrade for free today."></a>
+    </div>
+    <script src="/js/html5shiv.min.js"></script>
+    <![endif]-->
+</head>
+<body class="form-inputs-page">
+<!-- Start: Theme Preview Pane-->
+<div id="skin-toolbox" class="bg-white">
+
+</div>
+<!-- Start: Main-->
+<div id="main">
+    <$ include("header.html"); $>
+    <!-- Start: Content-Wrapper-->
+    <section id="content_wrapper">
+        <!-- Begin: Content-->
+        <div id="content" class="animated fadeIn">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="panel">
+                        <div class="panel-heading br-b"><span class="panel-title black">${task ? "Редактирование" : "Создание"} задачи</span></div>
+                        <div class="panel-body">
+                            <form role="form" class="form-horizontal">
+                                <div class="form-group has-primary">
+                                    <label for="title" class="col-lg-3 control-label black">Название</label>
+                                    <div class="col-lg-8">
+                                        <input id="title" type="text" class="form-control black" value="${task ? task.title : ''}">
+                                    </div>
+                                </div>
+                                <div class="form-group has-primary">
+                                    <label for="device" class="col-lg-3 control-label black">Устройство</label>
+                                    <div class="col-lg-8">
+                                        <select id="device" class="form-control black">
+                                            <$  for (var i=0; i < devices.length; i++)  {  $>
+                                            <option value="${devices[i].id}">${devices[i].title}</option>
+                                            <$  }  $>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group has-primary">
+                                    <label for="price" class="col-lg-3 control-label black">Цена</label>
+                                    <div class="col-lg-8">
+                                        <input id="price" type="tel" class="form-control black" value="${task ? task.price : ''}">
+                                    </div>
+                                </div>
+                                <div class="form-group has-primary">
+                                    <label for="description" class="col-lg-3 control-label black">Описание</label>
+                                    <div class="col-lg-8">
+                                        <textarea id="description" type="text" class="form-control black">${task ? task.description : ''}</textarea>
+                                    </div>
+                                </div>
+                                <div class="form-group has-primary">
+                                    <label for="count" class="col-lg-3 control-label black">Количество выполнений</label>
+                                    <div class="col-lg-8">
+                                        <input id="count" type="tel" class="form-control black" value="${task && task.countLimit!==0 ? task.countLimit : ''}">
+                                    </div>
+                                </div>
+                                <div class="form-group has-primary">
+                                    <label for="time" class="col-lg-3 control-label black">Время выполнения (мин)</label>
+                                    <div class="col-lg-8">
+                                        <input id="time" type="tel" class="form-control black" value="${task && task.timeLimit!==0 ? task.timeLimit : ''}">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-lg-3 control-label"></label>
+                                    <div class="col-lg-8">
+                                        <a id="submitTask" class="btn btn-info mb10 mr5 notification" data-note-style="info"
+                                           data-note-stack="stack_bottom_right" href="#">${task ? "Сохранить" : "Создать"}</a>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+</div>
+<!-- core scripts-->
+<script src="/plugins/core.min.js"></script>
+<script type="text/javascript" src="/js/crypt-js/core.js"></script>
+<script type="text/javascript" src="/js/crypt-js/sha1.js"></script>
+<script type="text/javascript" src="/js/crypt-js/hmac.js"></script>
+<script type="text/javascript" src="/js/crypt-js/pbkdf2.js"></script>
+<script type="text/javascript" src="/js/common"></script>
+<!-- Theme Javascript-->
+<script src="/assets/js/utility/utility.js"></script>
+<script src="/assets/js/demo/demo.js"></script>
+<script src="/assets/js/main.js"></script>
+<script type="text/javascript">
+    jQuery(document).ready(function () {
+        "use strict";
+        Core.init();
+        Demo.init();
+
+        $('#submitTask').click(function(event) {
+            event.preventDefault();
+            try {
+                var params = {};
+                params.title = document.getElementById("title").value;
+                var deviceTypes = document.getElementById("device");
+                var deviceType = deviceTypes.options[deviceTypes.selectedIndex];
+                if (!deviceType)  throw "Выберите устройство";
+                params.device = deviceType.value;
+                params.price = document.getElementById("price").value;
+                params.description = document.getElementById("description").value;
+                params.count = document.getElementById("count").value;
+                params.time = document.getElementById("time").value;
+                if (!params.title)  throw "Название должно быть не пустым";
+                if (!params.device)  throw "Выберите устройство";
+                if (!params.price)  throw "Цена должна быть не пустой";
+                if (params.price && (params.price==="0" || !params.price.match(/[0-9]+/)))  throw "Цена должна быть положительным числом";
+                if (!params.description)  throw "Описание должно быть не пустым";
+                if (params.count && (params.count==="0" || !params.count.match(/[0-9]+/)))  throw "Количество выполнений должно быть положительным числом";
+                if (params.time && (params.time==="0" || !params.time.match(/[0-9]+/)))  throw "Время выполнения должно быть положительным числом";
+                <$  if (task)  {  $>
+                action("tasks/${task.id}/edit", params, function () {  success("сохранено");  window.location.href = "/tasks/${task.id}";  });
+                <$  } else {  $>
+                action("tasks/create", params, function () {  success("задача создана");  window.location.href = "/tasks/all";  });
+                <$  }  $>
+            }
+            catch (e) {
+                error(e);
+            }
+        });
+    });
+</script>
+
+<$  include('footer.html');  $>
+</body>
+</html>

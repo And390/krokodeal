@@ -1,0 +1,1 @@
+nohup bin/CrookDeal >log.txt 2>&1 &

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>${title}</title>
+    <meta name="format-detection" content="telephone=no">
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <link rel="icon" href="/assets/img/favicon.ico" type="image/x-icon">
+    <!-- Stylesheets-->
+    <link rel="stylesheet" type="text/css" href="/assets/admin-tools/admin-forms/css/admin-forms.css">
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Lato:300,400,600,700%7CMontserrat:400,700">
+    <link rel="stylesheet" type="text/css" href="/assets/skin/default_skin/css/theme.css">
+		<!--[if lt IE 10]>
+    <div style="background: #212121; padding: 10px 0; box-shadow: 3px 3px 5px 0 rgba(0,0,0,.3); clear: both; text-align:center; position: relative; z-index:1;"><a href="http://windows.microsoft.com/en-US/internet-explorer/"><img src="/images/ie8-panel/warning_bar_0000_us.jpg" border="0" height="42" width="820" alt="You are using an outdated browser. For a faster, safer browsing experience, upgrade for free today."></a></div>
+    <script src="/js/html5shiv.min.js"></script>
+		<![endif]-->
+  </head>
+  <body class="external-page sb-l-c sb-r-c">
+    <!-- Start: Main-->
+    <div id="main" class="animated fadeIn">
+      <!-- Start: Content-Wrapper-->
+      <section id="content_wrapper">
+        <!-- begin canvas animation bg-->
+        <div id="canvas-wrapper">
+          <canvas id="demo-canvas"></canvas>
+        </div>
+        <!-- Begin: Content-->
+        <section id="content">
+          <div id="login1" class="admin-form theme-info">
+            <div class="row mb15 table-layout">
+              <div class="col-xs-6 va-m pln"><a href="index.html" title="Return to Dashboard"><img src="/assets/img/logos/logo_white.png" title="TemplateMonster Logo" class="img-responsive w250"></a></div>
+              <div class="col-xs-6 text-right va-b pr5">
+                <div class="login-links"><a href="login" title="Sign In" class="active">Войти</a> <span class="text-white">&#124;</span> <a href="register" title="Register">Регистрация</a>
+                </div>
+              </div>
+            </div>
+            <div class="panel panel-info mt10 br-n">
+                <div class="panel-body bg-light p30">
+                  <div class="row">
+                    <div class="col-sm-7 pr30">
+                      <div class="section row hidden">
+                        <div class="col-md-4"><a href="#" class="button btn-social facebook span-left mr5 btn-block"><span><i class="fa fa-facebook"></i></span>Facebook</a></div>
+                        <div class="col-md-4"><a href="#" class="button btn-social twitter span-left mr5 btn-block"><span><i class="fa fa-twitter"></i></span>Twitter</a></div>
+                        <div class="col-md-4"><a href="#" class="button btn-social googleplus span-left btn-block"><span><i class="fa fa-google-plus"></i></span>Google+</a></div>
+                      </div>
+                      <div class="section">
+                        <label for="username" class="field-label text-muted fs18 mb10">Логин</label>
+                        <label for="username" class="field prepend-icon">
+                          <input id="username" type="text" name="username" placeholder="Enter username" class="gui-input">
+                          <label for="username" class="field-icon"><i class="fa fa-user"></i></label>
+                        </label>
+                      </div>
+                      <div class="section">
+                        <label for="password" class="field-label text-muted fs18 mb10">Пароль</label>
+                        <label for="password" class="field prepend-icon">
+                          <input id="password" type="password" name="password" placeholder="Enter password" class="gui-input">
+                          <label for="password" class="field-icon"><i class="fa fa-lock"></i></label>
+                        </label>
+                      </div>
+                    </div>
+                    <div class="col-sm-5 br-l br-grey pl30">
+                      <h3 class="mb25"> You'll Have Access To Your:</h3>
+                      <p class="mb15"><span class="fa fa-check text-success pr5"></span> Unlimited Email Storage</p>
+                      <p class="mb15"><span class="fa fa-check text-success pr5"></span> Unlimited Photo Sharing/Storage</p>
+                      <p class="mb15"><span class="fa fa-check text-success pr5"></span> Unlimited Downloads</p>
+                      <p class="mb15"><span class="fa fa-check text-success pr5"></span> Unlimited Service Tickets</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="panel-footer clearfix p10 ph15">
+                  <button type="submit" class="button btn-primary mr10 pull-right" id="loginButton">Войти</button>
+                  <label class="switch ib switch-primary pull-left input-align mt10">
+                    <input id="remember" type="checkbox" name="remember" checked="">
+                    <label for="remember" data-on="YES" data-off="NO"></label> <span>Remember me</span>
+                  </label>
+                </div>
+            </div>
+          </div>
+        </section>
+      </section>
+    </div>
+    <!-- core scripts-->
+    <script src="/plugins/core.min.js"></script>
+    <script type="text/javascript" src="/js/crypt-js/core.js"></script>
+    <script type="text/javascript" src="/js/crypt-js/sha1.js"></script>
+    <script type="text/javascript" src="/js/crypt-js/hmac.js"></script>
+    <script type="text/javascript" src="/js/crypt-js/pbkdf2.js"></script>
+    <script type="text/javascript" src="/js/common"></script>
+    <!-- Theme Javascript-->
+    <script src="/assets/js/utility/utility.js"></script>
+    <script src="/assets/js/demo/demo.js"></script>
+    <script src="/assets/js/main.js"></script>
+    <!-- Page Javascript-->
+    <script type="text/javascript">
+      jQuery(document).ready(function () {
+        "use strict";
+        // Init Theme Core
+        Core.init();
+        // Init Demo JS
+        Demo.init();
+        // Init CanvasBG and pass target starting location
+        CanvasBG.init({
+          Loc: {
+            x: window.innerWidth / 2,
+            y: window.innerHeight / 3.3
+          }
+        });
+        // Login
+        jQuery("#loginButton").click(function(event)
+        {
+            try
+            {
+                var pars = {};
+                pars.login = document.getElementById("username").value;
+                pars.password = document.getElementById("password").value;
+                pars.remember = document.getElementById("remember").checked ? true : false;
+                if (!pars.login)  throw "Введите имя пользователя";
+                if (!pars.password)  throw "Введите пароль";
+                pars.password = CryptoJS.PBKDF2(pars.password, "#"+pars.login+"-salt!", { keySize: 128/32, iterations: 100 });
+                action("login", pars, function() {  if (window.location.href.match(/\/login$/))  window.location.href = "/";  else  reloadPage();  });
+            }
+            catch (e)
+            {
+                error(e);
+            }
+        });
+        jQuery("#username,#password").on('keydown', function(event)
+        {
+            if (event.key=='Enter')  jQuery("#loginButton").click();
+        });
+      });
+    </script>
+  </body>
+</html>

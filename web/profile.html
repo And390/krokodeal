@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <!-- Site Title-->
+    <meta charset="UTF-8">
+    <title>О себе</title>
+    <meta name="format-detection" content="telephone=no">
+    <meta name="viewport"
+          content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <link rel="icon" href="/assets/img/favicon.ico" type="image/x-icon">
+    <!-- Stylesheets-->
+    <link rel="stylesheet" type="text/css"
+          href="//fonts.googleapis.com/css?family=Lato:300,400,600,700%7CMontserrat:400,700">
+    <link rel="stylesheet" type="text/css" href="/assets/skin/default_skin/css/theme.css">
+    <link rel="stylesheet" type="text/css" href="/css/custom.css">
+    <!--[if lt IE 10]>
+    <div style="background: #212121; padding: 10px 0; box-shadow: 3px 3px 5px 0 rgba(0,0,0,.3); clear: both; text-align:center; position: relative; z-index:1;">
+        <a href="http://windows.microsoft.com/en-US/internet-explorer/"><img
+                src="/images/ie8-panel/warning_bar_0000_us.jpg" border="0" height="42" width="820"
+                alt="You are using an outdated browser. For a faster, safer browsing experience, upgrade for free today."></a>
+    </div>
+    <script src="/js/html5shiv.min.js"></script>
+    <![endif]-->
+</head>
+<body class="form-inputs-page">
+<!-- Start: Theme Preview Pane-->
+<div id="skin-toolbox" class="bg-white">
+
+</div>
+<!-- Start: Main-->
+<div id="main">
+    <$ include("header.html"); $>
+    <!-- Start: Content-Wrapper-->
+    <section id="content_wrapper">
+        <!-- Begin: Content-->
+        <div id="content" class="animated fadeIn">
+            <div class="row">
+                <div class="col-md-12">
+                    <!-- Input Fields-->
+
+                    <!-- Field о себе-->
+                    <div class="panel">
+                        <div class="panel-heading br-b"><span class="panel-title black">О себе</span></div>
+                        <div class="panel-body">
+                            <form role="form" class="form-horizontal">
+                                <div class="form-group has-primary">
+                                    <label for="city" class="col-lg-3 control-label black">Город*</label>
+                                    <div class="col-lg-8">
+                                        <input id="city" type="text" class="form-control black" value="${master.city}">
+                                    </div>
+                                </div>
+                                <div class="form-group has-primary">
+                                    <label for="phone" class="col-lg-3 control-label black">Телефон</label>
+                                    <div class="col-lg-8">
+                                        <input id="phone" type="tel" class="form-control black" value="${master.phone}">
+                                    </div>
+                                </div>
+                                <div class="form-group has-primary">
+                                    <label class="col-lg-3 control-label black">Пол</label>
+                                    <div class="col-lg-8">
+                                        <label class="radio-inline mr10 black">
+                                            <input id="gender_male" name="gender" value="1" ${master.male===true ? " checked" : ""} type="radio">Мужской
+                                        </label>
+                                        <label class="radio-inline mr10 black">
+                                            <input id="gender_female" name="gender" value="0" ${master.male===false ? " checked" : ""} type="radio">Женский
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="form-group has-primary">
+                                    <label for="age" class="col-lg-3 control-label black">Возраст</label>
+                                    <div class="col-lg-8">
+                                        <input id="age" type="text" class="form-control black" value="${master.age}">
+                                    </div>
+                                </div>
+                                <div class="form-group has-primary">
+                                    <label for="device" class="col-lg-3 control-label black">Устройство</label>
+                                    <div class="col-lg-8">
+                                        <select id="device" class="form-control black">
+                                            <option value=""></option>
+                                            <$  for (var i=0, j=0; i < devices.length; i++)  if (devices[i].type=='phone')  {  $>
+                                            <option id="device_${devices[i].id}" value="${devices[i].id}">${devices[i].title}</option>
+                                            <$  }  $>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group has-primary">
+                                    <label for="tablet" class="col-lg-3 control-label black">Планшет</label>
+                                    <div class="col-lg-8">
+                                        <select id="tablet" class="form-control black">
+                                            <option value=""></option>
+                                            <$  for (var i=0, j=0; i < devices.length; i++)  if (devices[i].type=='tablet')  {  $>
+                                            <option id="device_${devices[i].id}" value="${devices[i].id}">${devices[i].title}</option>
+                                            <$  }  $>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-lg-3 control-label"></label>
+                                    <div class="col-lg-8">
+                                        <a id="submitAbout" class="btn btn-info mb10 mr5 notification" data-note-style="info"
+                                           data-note-stack="stack_bottom_right" href="#">Сохранить</a>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <!-- Field оплата-->
+                    <div class="panel">
+                        <div class="panel-heading br-b"><span class="panel-title black">Оплата</span></div>
+                        <div class="panel-body">
+                            <form role="form" class="form-horizontal">
+                                <div class="form-group has-primary">
+                                    <label for="walletType" class="col-lg-3 control-label black">Тип кошелька</label>
+                                    <div class="col-lg-8">
+                                        <select id="walletType" class="form-control black">
+                                            <option value=""></option>
+                                            <$  for (var i=0; i < wallets.length; i++)  {  $>
+                                            <option value="${wallets[i].id}" ${master.walletType === wallets[i].id ? " selected='selected'" : ""}>${wallets[i].title}</option>
+                                            <$  }  $>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group has-primary">
+                                    <label for="walletNum" class="col-lg-3 control-label black">Номер пополнения</label>
+                                    <div class="col-lg-8">
+                                        <input id="walletNum" type="text" class="form-control black" value="${master.walletNum}">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-lg-3 control-label"></label>
+                                    <div class="col-lg-8">
+                                        <a id="submitWallet" class="btn btn-info mb10 mr5 notification" data-note-style="info"
+                                           data-note-stack="stack_bottom_right" href="#">Сохранить</a>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <!-- Field Пароль-->
+                    <div class="panel">
+                        <div class="panel-heading br-b"><span class="panel-title black">Изменить пароль</span></div>
+                        <div class="panel-body">
+                            <form role="form" class="form-horizontal">
+                                <div class="form-group has-primary">
+                                    <label for="password" class="col-lg-3 control-label black">Пароль</label>
+                                    <div class="col-lg-8">
+                                        <input id="password" type="password" class="form-control black">
+                                    </div>
+                                </div>
+                                <div class="form-group has-primary">
+                                    <label for="confirm" class="col-lg-3 control-label black">Еще раз</label>
+                                    <div class="col-lg-8">
+                                        <input id="confirm" type="password" class="form-control black">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-lg-3 control-label"></label>
+                                    <div class="col-lg-8">
+                                        <a id="submitPassword" class="btn btn-info mb10 mr5 notification" data-note-style="info"
+                                           data-note-stack="stack_bottom_right" href="#">Сохранить</a>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <p class="black">* - обязательные для заполнения поля.</p>
+
+                    <p class="black">Имеется возможность оплаты на номер телефона..</p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+</div>
+<!-- core scripts-->
+<script src="/plugins/core.min.js"></script>
+<script type="text/javascript" src="/js/crypt-js/core.js"></script>
+<script type="text/javascript" src="/js/crypt-js/sha1.js"></script>
+<script type="text/javascript" src="/js/crypt-js/hmac.js"></script>
+<script type="text/javascript" src="/js/crypt-js/pbkdf2.js"></script>
+<script type="text/javascript" src="/js/common"></script>
+<!-- Theme Javascript-->
+<script src="/assets/js/utility/utility.js"></script>
+<script src="/assets/js/demo/demo.js"></script>
+<script src="/assets/js/main.js"></script>
+<script type="text/javascript">
+    jQuery(document).ready(function () {
+        "use strict";
+        Core.init();
+        Demo.init();
+
+        var allDevicesList = ${devices};
+        var allDevices = {};
+        for (var i=0; i<allDevicesList.length; i++)  allDevices[allDevicesList[i].id] = allDevicesList[i];
+        var masterDevicesId = ${master.devices};
+        for (var i=0; i<masterDevicesId.length; i++)  {
+            if (allDevices[masterDevicesId[i]] && allDevices[masterDevicesId[i]].type=='phone')  $('#device').val(masterDevicesId[i]);
+            if (allDevices[masterDevicesId[i]] && allDevices[masterDevicesId[i]].type=='tablet')  $('#tablet').val(masterDevicesId[i]);
+        }
+
+        $('#submitAbout').click(function(event) {
+            event.preventDefault();
+            var params = {};
+            params.city = document.getElementById("city").value;
+            if (!params.city)  {  error("Поле 'Город' обязательно для заполнения");  return;  }
+            params.phone = document.getElementById("phone").value;
+            var male = document.getElementById("gender_male").checked ? true :
+                       document.getElementById("gender_female").checked ? false : undefined;
+            if (male !== undefined)  params.male = male;
+            params.age = document.getElementById("age").value;
+            params.devices = [];
+            if ($('#device').val())  params.devices.push($('#device').val());
+            if ($('#tablet').val())  params.devices.push($('#tablet').val());
+            if (!params.devices.length)  {  error("Укажите устройство или планшет");  return;  }
+            action("profile_info", params);
+        });
+        $('#submitWallet').click(function(event) {
+            event.preventDefault();
+            var params = {};
+            params.walletType = document.getElementById("walletType").value;
+            params.walletNum = document.getElementById("walletNum").value;
+            action("profile_wallet", params);
+        });
+        $('#submitPassword').click(function(event) {
+            event.preventDefault();
+            var params = {};
+            params.password = document.getElementById("password").value;
+            var confirm = document.getElementById("confirm").value;
+            if (!params.password)  {  error("Пустой пароль");  return;  }
+            if (!confirm)  {  error("Введите подтверждение пароля");  return;  }
+            if (params.password != confirm)  {  error("Пароли не совпадают");  return;  }
+            params.password = CryptoJS.PBKDF2(params.password, "#${user.login}-salt!", { keySize: 128/32, iterations: 100 });
+            action("change_password", params);
+        });
+    });
+</script>
+
+<$  include('footer.html');  $>
+</body>
+</html>

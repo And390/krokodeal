@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Регистрация</title>
+    <meta name="format-detection" content="telephone=no">
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <link rel="icon" href="/assets/img/favicon.ico" type="image/x-icon">
+    <!-- Stylesheets-->
+    <link rel="stylesheet" type="text/css" href="/assets/admin-tools/admin-forms/css/admin-forms.css">
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Lato:300,400,600,700%7CMontserrat:400,700">
+    <link rel="stylesheet" type="text/css" href="/assets/skin/default_skin/css/theme.css">
+		<!--[if lt IE 10]>
+    <div style="background: #212121; padding: 10px 0; box-shadow: 3px 3px 5px 0 rgba(0,0,0,.3); clear: both; text-align:center; position: relative; z-index:1;"><a href="http://windows.microsoft.com/en-US/internet-explorer/"><img src="/images/ie8-panel/warning_bar_0000_us.jpg" border="0" height="42" width="820" alt="You are using an outdated browser. For a faster, safer browsing experience, upgrade for free today."></a></div>
+    <script src="/js/html5shiv.min.js"></script>
+		<![endif]-->
+  </head>
+  <body class="external-page sb-l-c sb-r-c">
+    <!-- Start: Main-->
+    <div id="main" class="animated fadeIn">
+      <!-- Start: Content-Wrapper-->
+      <section id="content_wrapper">
+        <!-- begin canvas animation bg-->
+        <div id="canvas-wrapper">
+          <canvas id="demo-canvas"></canvas>
+        </div>
+        <!-- Begin: Content-->
+        <section id="content">
+          <div id="login1" style="margin-top: 3%;" class="admin-form theme-info mw700">
+            <div class="row mb15 table-layout">
+              <div class="col-xs-6 va-m pln"><a href="index.html" title="Return to Dashboard"><img src="/assets/img/logos/logo_white.png" title="TemplateMonster Logo" class="img-responsive w250"></a></div>
+              <div class="col-xs-6 text-right va-b pr5">
+                <div class="login-links"><a href="login" title="Sign In">Войти</a> <span class="text-white">&#124;</span> <a href="register" title="Register" class="active">Регистрация</a>
+                </div>
+              </div>
+            </div>
+            <div class="panel panel-info mt10 br-n">
+                <div class="panel-body p25 bg-light">
+                  <div class="section-divider mt10 mb40"><span>Создайте свой аккаунт</span></div>
+				  <div class="section">
+                    <label for="firstname" class="field prepend-icon">
+                      <input id="firstname" type="email" name="email" placeholder="Логин" class="gui-input">
+                      <label for="firstname" class="field-icon"><i class="fa fa-user"></i></label>
+                    </label>
+                  </div>
+                  <div class="section">
+                    <label for="email" class="field prepend-icon">
+                      <input id="email" type="email" name="email" placeholder="Ваш email" class="gui-input">
+                      <label for="email" class="field-icon"><i class="fa fa-envelope"></i></label>
+                    </label>
+                  </div>
+                  <div class="section">
+                    <label for="password" class="field prepend-icon">
+                      <input id="password" type="password" name="password" placeholder="Ваш пароль" class="gui-input">
+                      <label for="password" class="field-icon"><i class="fa fa-unlock-alt"></i></label>
+                    </label>
+                  </div>
+                  <div class="section">
+                    <label for="confirmPassword" class="field prepend-icon">
+                      <input id="confirmPassword" type="password" name="confirmPassword" placeholder="Повторите пароль" class="gui-input">
+                      <label for="confirmPassword" class="field-icon"><i class="fa fa-lock"></i></label>
+                    </label>
+                  </div>
+                </div>
+                <div class="panel-footer clearfix">
+                  <button id="registerButton" type="submit" class="button btn-primary pull-right">Создать аккаунт</button>
+                </div>
+            </div>
+          </div>
+        </section>
+      </section>
+    </div>
+    <!-- core scripts-->
+    <script src="/plugins/core.min.js"></script>
+    <script type="text/javascript" src="/js/crypt-js/core.js"></script>
+    <script type="text/javascript" src="/js/crypt-js/sha1.js"></script>
+    <script type="text/javascript" src="/js/crypt-js/hmac.js"></script>
+    <script type="text/javascript" src="/js/crypt-js/pbkdf2.js"></script>
+    <script type="text/javascript" src="/js/common"></script>
+    <!-- Theme Javascript-->
+    <script src="/assets/js/utility/utility.js"></script>
+    <script src="/assets/js/demo/demo.js"></script>
+    <script src="/assets/js/main.js"></script>
+    <!-- Page Javascript-->
+    <script type="text/javascript">
+      jQuery(document).ready(function () {
+        "use strict";
+        // Init Theme Core
+        Core.init();
+        // Init Demo JS
+        Demo.init();
+        // Init CanvasBG and pass target starting location
+        CanvasBG.init({
+          Loc: {
+            x: window.innerWidth / 2.1,
+            y: window.innerHeight / 4.2
+          }
+        });
+        //
+        var EMAIL_REGEX = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        jQuery("#registerButton").click(function(event)
+        {
+            try
+            {
+                var pars = {};
+                pars.login = document.getElementById("email").value;
+                pars.password = document.getElementById("password").value;
+                var confirmPassword = document.getElementById("confirmPassword").value;
+                if (!pars.login)  throw "Введите имя пользователя";
+                if (!EMAIL_REGEX.test(pars.login))  throw "Неправильный email";
+                if (!pars.password)  throw "Введите пароль";
+                if (!confirmPassword)  throw "Введите подтверждение пароля";
+                if (pars.password != confirmPassword)  throw "Пароли не совпадают";
+                pars.password = CryptoJS.PBKDF2(pars.password, "#"+pars.login+"-salt!", { keySize: 128/32, iterations: 100 });
+                action("register", pars, function() {
+                    window.location.href = "/"; // TODO redirect with message
+                });
+            }
+            catch (e)
+            {
+                error(e);
+            }
+        });
+        jQuery("#email,#password,#confirmPassword").on('keydown', function(event)
+        {
+            if (event.key=='Enter')  jQuery("#registerButton").click();
+        });
+      });
+    </script>
+  </body>
+</html>

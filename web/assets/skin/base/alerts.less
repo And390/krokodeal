@@ -1,0 +1,123 @@
+/*==================================================
+  Alerts
+==================================================== */
+
+
+// Base styles
+// -------------------------
+
+.alert {
+  position: relative;
+  color: @white;
+  font-size: @alert-font-size;
+  padding: @alert-padding;
+  margin-bottom: 8px;
+  border: 0 solid rgba(0,0,0,0.1);
+  border-radius: @alert-border-radius;
+  letter-spacing: 0.02em;
+
+  // Adjust close link position
+  .close {
+    color: @text-color;
+      &:hover { 
+        color: @text-color;
+      }
+  }
+
+  .btn-default{
+    color: @white;
+    border: 2px solid @white;
+    background-color: transparent;
+  }
+
+  .btn-white{
+    border: 2px solid @white;
+    background-color: @white;
+  }
+
+  .btn{
+    padding: 2px 12px;
+  }
+
+  // Divider
+  hr {
+    border-top-color: #f2f2f2;
+    border-top-width: 2px;
+  }
+
+  // Headings for larger alerts
+  h4 {
+    margin-top: 0;
+    // Specified for the h4 to prevent conflicts of changing @headings-color
+    color: inherit;
+  }
+  // Provide class for links that match alerts
+  .alert-link {
+    color: @white;
+    font-weight: @alert-link-font-weight;
+  }
+
+  // Improve alignment and spacing of inner content
+  > p,
+  > ul {
+    margin-bottom: 0;
+  }
+  > p + p {
+    margin-top: 5px;
+  }
+
+  // Alert sizes
+  &.alert-micro,.alert-sm {
+  font-size: 13px;
+  padding: 9px 35px 9px 9px;
+  border-radius: 0;
+  }
+  &.alert-sm { padding: 12px 35px 12px 12px; }
+
+  // Border variations - options
+  &.alert-border { border: 1px solid transparent; }
+  &.alert-border-right { border-right-width: 6px; }
+  &.alert-border-top { border-top-width: 3px; }
+  &.alert-border-bottom { border-bottom-width: 3px; }
+  &.alert-border-left {
+    padding-left: 15px;
+    border-left-width: 6px;
+  }
+
+}
+
+// Dismissible alerts
+//
+// Expand the right padding and account for the close button's positioning.
+.alert-dismissable, // The misspelled .alert-dismissable was deprecated in 3.2.0.
+.alert-dismissible {
+  padding-right: (@alert-padding + 20);
+
+  // Adjust close link position
+  .close {
+    position: absolute;
+    right: 18px;
+    width: 20px;
+    height: 20px;
+    color: #FFF;
+    opacity: 1;
+    transition: .25s ease-out;
+
+    &:after,
+    &:before{
+      position: absolute;
+      top: 4px;
+      left: 9px;
+      height: 13px;
+      width: 2px;
+      content: '';
+      background: #fff;
+    }
+    &:after{
+      transform: rotate(45deg);
+    }
+    &:before{
+      transform: rotate(-45deg);
+    }
+  }
+}

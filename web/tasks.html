@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <!-- Site Title-->
+    <meta charset="UTF-8">
+    <title>Задачи</title>
+    <meta name="format-detection" content="telephone=no">
+    <meta name="viewport"
+          content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <link rel="icon" href="/assets/img/favicon.ico" type="image/x-icon">
+    <!-- Stylesheets-->
+    <link rel="stylesheet" type="text/css" href="/assets/admin-tools/admin-forms/css/admin-forms.css">
+    <link rel="stylesheet" type="text/css"
+          href="//fonts.googleapis.com/css?family=Lato:300,400,600,700%7CMontserrat:400,700">
+    <link rel="stylesheet" type="text/css" href="/assets/skin/default_skin/css/theme.css">
+    <link rel="stylesheet" type="text/css" href="/css/custom.css">
+    <!--[if lt IE 10]>
+    <div style="background: #212121; padding: 10px 0; box-shadow: 3px 3px 5px 0 rgba(0,0,0,.3); clear: both; text-align:center; position: relative; z-index:1;">
+        <a href="http://windows.microsoft.com/en-US/internet-explorer/"><img
+                src="/images/ie8-panel/warning_bar_0000_us.jpg" border="0" height="42" width="820"
+                alt="You are using an outdated browser. For a faster, safer browsing experience, upgrade for free today."></a>
+    </div>
+    <script src="/js/html5shiv.min.js"></script>
+    <![endif]-->
+</head>
+<body class="ecommerce-page">
+<!-- Start: Theme Preview Pane-->
+<div id="skin-toolbox" class="bg-white">
+
+</div>
+<!-- Start: Main-->
+<div id="main">
+    <$ include("header.html"); $>
+    <!-- Start: Content-Wrapper-->
+    <section id="content_wrapper">
+
+        <!-- Begin: Content-->
+        <div id="content" class="animated fadeIn">
+            <div class="row">
+                <div class="col-md-12">
+                    <!-- Input Fields-->
+                    <$  if (path.endsWith('/open') || path.endsWith('/work') || path.endsWith('/complete') || path.endsWith('/confirm'))  {  $>
+                    <ul class="nav nav-tabs">
+                        <li ${path.endsWith('/open') ? "class='active'" : ""}><a href="open">Новые</a></li>
+                        <li ${path.endsWith('/work') ? "class='active'" : ""}><a href="work">В работе</a></li>
+                        <li ${path.endsWith('/complete') ? "class='active'" : ""}><a href="complete">На модерации</a></li>
+                        <li ${path.endsWith('/confirm') ? "class='active'" : ""}><a href="confirm">Подтвержденные</a></li>
+                    </ul>
+                    <$  }  $>
+                    <div class="tab-content">
+                        <!-- Field Список новых задач-->
+                        <div class="panel">
+                            <div class="panel-body">
+                                <$  if (path.endsWith('/all') || path.endsWith('/master') || path.endsWith('/confirm'))  {  $>
+                                <div class="panel-menu admin-form theme-primary">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <label for="filter-datepicker1" class="field prepend-picker-icon">
+                                                <input id="filter-datepicker1" type="text" value="02/03/2015"
+                                                       name="filter-datepicker1" placeholder="Filter by Date"
+                                                       class="gui-input">
+                                            </label>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label for="filter-datepicker2" class="field prepend-picker-icon">
+                                                <input id="filter-datepicker2" type="text" value="03/03/2016"
+                                                       name="filter-datepicker2" placeholder="Filter by Date"
+                                                       class="gui-input">
+                                            </label>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <button id="filterButton" type="button" class="btn btn-primary"
+                                                    style="height: 42px;padding-top: 10px;">Показать
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <$  }  $>
+
+                                <div class="table-responsive">
+                                    <table class="table admin-form theme-warning fs13">
+                                        <thead>
+                                        <tr class="bg-light">
+                                            <$  if (path.endsWith('/master'))  {  $>
+                                            <th>Мастер</th>
+                                            <th>Статус</th>
+                                            <th>Дата взятия</th>
+                                            <$  }  $>
+                                            <th>Название задачи</th>
+                                            <th>Тип устройств</th>
+                                            <th>Цена выполнения</th>
+                                            <$ if (path.endsWith('/all')) { $><th>Дата создания</th><$ } $>
+                                            <$ if (path.endsWith('/open')) { $><th>Дата появления</th><$ } $>
+                                            <$ if (path.endsWith('/work')) { $><th>Дата взятия в работу</th><$ } $>
+                                            <$ if (path.endsWith('/complete')) { $><th>Дата завершения</th><$ } $>
+                                            <$ if (path.endsWith('/confirm')) { $><th>Дата утверждения</th><$ } $>
+                                            <$ if (user.role.name()=='ADMIN') { $><th>Статус</th><$ } $>
+                                            <th></th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <$  function getDeviceTitle(deviceId)  {  var device = devicesMap[deviceId];  return device ? device.title : "???";  }  $>
+                                        <$  var taskStatuses = {  WORK: "в работе", COMPLETE: "выполнена", CONFIRM: "подтверждена"  };  $>
+                                        <$  function getStatus(status)  {  return status ? taskStatuses[status.name()] || "?" : "не взята";  }  $>
+                                        <$  for (var i=0; i < tasks.length; i++)  {  $>
+                                        <tr>
+                                            <$  if (path.endsWith('/master'))  {  $>
+                                            <td>${tasks[i].masterLogin}</td>
+                                            <td>${getStatus(tasks[i].status)}</td>
+                                            <td>${tasks[i].taken ? dateFormat.format(tasks[i].taken) : ""}</td>
+                                            <$  }  $>
+                                            <td>${tasks[i].title}</td>
+                                            <td class="w175">${getDeviceTitle(tasks[i].deviceId)}</td>
+                                            <td>${tasks[i].price}</td>
+                                            <$ if (path.endsWith('/all')) { $><td>${tasks[i].created ? dateFormat.format(tasks[i].created) : ""}</td><$ } $>
+                                            <$ if (path.endsWith('/open')) { $><td>${tasks[i].started ? dateFormat.format(tasks[i].started) : ""}</td><$ } $>
+                                            <$ if (path.endsWith('/work')) { $><td>${tasks[i].taken ? dateFormat.format(tasks[i].taken) : ""}</td><$ } $>
+                                            <$ if (path.endsWith('/complete')) { $><td>${tasks[i].completed ? dateFormat.format(tasks[i].completed) : ""}</td><$ } $>
+                                            <$ if (path.endsWith('/confirm')) { $><td>${tasks[i].confirmed ? dateFormat.format(tasks[i].confirmed) : ""}</td><$ } $>
+                                            <$ if (user.role.name()=='ADMIN') { $><td>${tasks[i].state.name()=='START' ? "запущена" : "остановлена"}</td><$ } $>
+                                            <td class="text-right">
+                                                <div class="btn-group text-right">
+                                                    <a href="/tasks/${tasks[i].id + (path.endsWith('/master') ? '/'+tasks[i].masterId: '')}" class="btn btn-info br2 btn-xs fs12">
+                                                        Подробнее
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <$  }  $>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+
+            </div>
+        </div>
+    </section>
+</div>
+<!-- core scripts-->
+<script src="/plugins/core.min.js"></script>
+<script type="text/javascript" src="/js/common"></script>
+<!-- Admin Forms JS-->
+<script src="/assets/admin-tools/admin-forms/js/jquery-ui-datepicker.min.js"></script>
+<!-- Theme Javascript-->
+<script src="/assets/js/utility/utility.js"></script>
+<script src="/assets/js/demo/demo.js"></script>
+<script src="/assets/js/main.js"></script>
+<script type="text/javascript">
+    jQuery(document).ready(function () {
+        "use strict";
+        // Init Theme Core
+        Core.init();
+        // Init Demo JS
+        Demo.init();
+        // select dropdowns - placeholder like creation
+        var selectList = $('.admin-form select');
+        selectList.each(function (i, e) {
+            $(e).on('change', function () {
+                if ($(e).val() == "0") $(e).addClass("empty");
+                else $(e).removeClass("empty")
+            });
+        });
+        selectList.each(function (i, e) {
+            $(e).change();
+        });
+        // Init datepicker widget
+        $('#filter-datepicker1').datepicker({
+            dateFormat: "${dateformat}",
+            numberOfMonths: 1,
+            showOn: 'both',
+            buttonText: '<i class="fa fa-calendar-o"></i>',
+            prevText: '<i class="fa fa-chevron-left"></i>',
+            nextText: '<i class="fa fa-chevron-right"></i>',
+            beforeShow: function (input, inst) {
+                var newclass = 'admin-form';
+                var themeClass = $(this).parents('.admin-form').attr('class');
+                var smartpikr = inst.dpDiv.parent();
+                if (!smartpikr.hasClass(themeClass)) {
+                    inst.dpDiv.wrap('<div class="' + themeClass + '"></div>');
+                }
+            }
+        });
+        $('#filter-datepicker2').datepicker({
+            dateFormat: "${dateformat}",
+            numberOfMonths: 1,
+            showOn: 'both',
+            buttonText: '<i class="fa fa-calendar-o"></i>',
+            prevText: '<i class="fa fa-chevron-left"></i>',
+            nextText: '<i class="fa fa-chevron-right"></i>',
+            beforeShow: function (input, inst) {
+                var newclass = 'admin-form';
+                var themeClass = $(this).parents('.admin-form').attr('class');
+                var smartpikr = inst.dpDiv.parent();
+                if (!smartpikr.hasClass(themeClass)) {
+                    inst.dpDiv.wrap('<div class="' + themeClass + '"></div>');
+                }
+            }
+        });
+
+        $('#filterButton').click(function() {
+            var from = $('#filter-datepicker1').datepicker().val();
+            var to = $('#filter-datepicker2').datepicker().val();
+            var href = document.location.pathname;
+            if (from)  href += "?from=" + encodeURIComponent(from);
+            if (to)  href += (from ? "&to=" : "?to=") + encodeURIComponent(to);
+            document.location.href = href;
+        });
+
+        $('#filter-datepicker1').datepicker().val("");
+        $('#filter-datepicker2').datepicker().val("");
+        if (window.location.search)  {
+            var params = window.location.search.substring(1).split('&');
+            for (var i=0; i<params.length; i++)  {
+                var j = params[i].indexOf('=');
+                var key = j===-1 ? params[i] : params[i].substring(0, j);
+                var val = j===-1 ? undefined : params[i].substring(j+1);
+
+                if (key === "from")  $('#filter-datepicker1').datepicker().val(val);
+                if (key === "to")  $('#filter-datepicker2').datepicker().val(val);
+            }
+        }
+    });
+</script>
+
+<$ include("footer.html"); $>
+</body>
+</html>

@@ -1,0 +1,72 @@
+/*==================================================
+  Labels
+==================================================== */
+
+.label {
+  display: inline;
+  padding: .3em .7em .4em;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 24px;
+  color: @label-color;
+  text-align: center;
+  white-space: nowrap;
+  text-transform: uppercase;
+  vertical-align: baseline;
+  border-radius: 0;
+  left: 0.02em;
+
+  // Label sizes
+  &.label-xs {
+    padding: 0 .35em .1em;
+    font-size: 11px;
+  }
+
+  // Label sizes
+  &.label-sm {
+    padding: .1em .65em .2em;
+    font-size: 11px;
+  }
+  &.label-lg {
+    padding: .4em .9em .5em;
+    font-size: 13px;
+  }
+
+  // Rounded option
+  &.label-rounded {
+    padding: .2em 0.85em .3em;
+    border-radius: 50px;
+      &.label-xs { padding: 0 .35em .1em; }
+      &.label-sm { padding: .1em .65em .2em; }
+      &.label-lg { padding: .4em .9em .5em; }
+  }
+
+  // Add hover effects, but only for links
+  a& {
+    &:hover,
+    &:focus {
+      color: @label-link-hover-color;
+      text-decoration: none;
+      cursor: pointer;
+    }
+  }
+
+  // Empty labels collapse automatically (not available in IE8)
+  &:empty {
+    display: none;
+  }
+
+  // Quick fix for labels in buttons
+  .btn & {
+    position: relative;
+    top: -1px;
+  }
+}
+
+.label-warning.dark{
+  background-color: #ff9800;
+}
+.label-primary.dark{
+  background-color: #00b8d4;
+}
+
