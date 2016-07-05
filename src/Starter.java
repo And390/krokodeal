@@ -15,11 +15,11 @@ import org.glassfish.jersey.servlet.ServletContainer;
 import ru.and390.template.TemplateManager;
 import ru.and390.template.WatchFileTemplateManager;
 import service.MailSender;
+import service.TaskReturnScheduler;
 import util.Config;
 import web.AppExceptionMapper;
 import web.EndPoint;
 
-import javax.print.attribute.standard.Media;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -49,8 +49,9 @@ public class Starter {
 
         //  initialize components
         DataAccess dataAccess = new DataAccess(dataSource);
+        TaskReturnScheduler taskReturnScheduler = add(closeables, new TaskReturnScheduler(dataAccess));
         MailSender mailSender = new MailSender();
-        EndPoint endPoint = new EndPoint(dataAccess, mailSender, templateManager);
+        EndPoint endPoint = new EndPoint(dataAccess, taskReturnScheduler, mailSender, templateManager);
 
         //  initialize server
         int port = Config.getUInt("server.port");

@@ -5,6 +5,7 @@ import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import ru.and390.template.TemplateManager;
 import service.MailSender;
+import service.TaskReturnScheduler;
 import util.Config;
 import util.OrderedListMap;
 import util.sql.SingleConnectionDataSource;
@@ -25,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigInteger;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -39,6 +41,7 @@ public class EndPoint extends AbstractEndPoint {
     // TODO not authorized и not logged in надо разделить - только в первом случае клиент должен обновлять страницу (а лучше еще мессадж прокидывать при релоаде)
 
     private final DataAccess dataAccess;
+    private final TaskReturnScheduler taskReturnScheduler;
     private final MailSender mailSender;
     private final TemplateManager templateManager;
 
@@ -46,20 +49,24 @@ public class EndPoint extends AbstractEndPoint {
     private final String registerMailText;
 
     private final SimpleDateFormat dateFormat;
+    private final SimpleDateFormat datetimeFormat;
 
-    public EndPoint(DataAccess dataAccess, MailSender mailSender, TemplateManager templateManager) {
+    public EndPoint(DataAccess dataAccess, TaskReturnScheduler taskReturnScheduler, MailSender mailSender, TemplateManager templateManager) {
         this.dataAccess = dataAccess;
+        this.taskReturnScheduler = taskReturnScheduler;
         this.mailSender = mailSender;
         this.templateManager = templateManager;
         this.registerMailSubject = Config.getNotEmpty("register.mail.subject");
         this.registerMailText = Config.getNotEmpty("register.mail.text");
         this.dateFormat = new SimpleDateFormat(Config.getNotEmpty("web.def.dateformat").replace("m", "M").replace("yy", "yyyy"));
+        this.datetimeFormat = new SimpleDateFormat(Config.getNotEmpty("web.def.datetimeformat"));
     }
 
     @Override
     protected Bindings createBindings(HttpServletRequest request, User user) {
         Bindings bindings = super.createBindings(request, user);
         bindings.put("dateFormat", dateFormat);
+        bindings.put("datetimeFormat", datetimeFormat);
         return bindings;
     }
 
@@ -354,7 +361,6 @@ public class EndPoint extends AbstractEndPoint {
 //        return ApiResponse.success();
 //    }
 
-    //TODO может ли админ запускать/останавливать задачи чужих админов
     @POST  @Path("/start_task")  @Produces(JSON_TYPE)
     public ApiResponse postStartTask(@Context HttpServletRequest request, @FormParam("id") Integer id) throws Exception
     {
@@ -379,6 +385,7 @@ public class EndPoint extends AbstractEndPoint {
         checkNotNull(id, "id");
         User user = checkRights(request, MASTER);
         if (!dataAccess.takeTask(id, user.id))  throw new ClientException("Невозможно взять задачу");
+        scheduleTaskReturn(id, user.id);
         return ApiResponse.success();
     }
 
@@ -388,6 +395,7 @@ public class EndPoint extends AbstractEndPoint {
         checkNotNull(id, "id");
         User user = checkRights(request, MASTER);
         if (!dataAccess.returnTask(id, user.id))  throw new ClientException("Невозможно вернуть задачу");
+        taskReturnScheduler.cancel(id, user.id);
         return ApiResponse.success();
     }
 
@@ -397,6 +405,7 @@ public class EndPoint extends AbstractEndPoint {
         checkNotNull(id, "id");
         User user = checkRights(request, MASTER);
         if (!dataAccess.completeTask(id, user.id))  throw new ClientException("Невозможно выполнить задачу");
+        taskReturnScheduler.cancel(id, user.id);
         return ApiResponse.success();
     }
 
@@ -406,6 +415,7 @@ public class EndPoint extends AbstractEndPoint {
         checkNotNull(id, "id");
         User user = checkRights(request, MASTER);
         if (!dataAccess.resumeTask(id, user.id))  throw new ClientException("Невозможно возобновить задачу");
+        scheduleTaskReturn(id, user.id);
         return ApiResponse.success();
     }
 
@@ -416,6 +426,7 @@ public class EndPoint extends AbstractEndPoint {
         checkNotNull(masterId, "master");
         User user = checkRights(request, ADMIN);
         if (!dataAccess.resumeTask(id, masterId))  throw new ClientException("Невозможно отказать задачу");
+        scheduleTaskReturn(id, user.id);
         return ApiResponse.success();
     }
 
@@ -427,6 +438,13 @@ public class EndPoint extends AbstractEndPoint {
         User user = checkRights(request, ADMIN);
         if (!dataAccess.confirmTask(id, masterId, user.id))  throw new ClientException("Невозможно подтвердить задачу");
         return ApiResponse.success();
+    }
+
+    private void scheduleTaskReturn(int taskId, int masterId) throws SQLException  {
+        Task task = dataAccess.loadTask(taskId, null, null);
+        if (task != null && task.timeLimit>0)  {  //маловероятно чтобы кто-то мог удалить задачу, но хуже от проверки не будет
+            taskReturnScheduler.schedule(taskId, masterId, System.currentTimeMillis() + Task.LIMIT_TIME_UNIT.toMillis(task.timeLimit));
+        }
     }
 
     @GET  @Path("/task_message")

@@ -55,7 +55,7 @@ public class Config {
         return value;
     }
 
-    public static int getInt(String name, int minValue, int maxValue, String error) throws utils.ConfigException
+    public static int getInt(String name, int minValue, int maxValue, String error) throws ConfigException
     {
         String value = getNotEmpty(name);
         try  {  int result = Integer.parseInt(value);
@@ -64,23 +64,23 @@ public class Config {
         catch (NumberFormatException e)  {  throw new ConfigException(FILE_NAME + ": "+name+" value "+error+": "+value);  }
     }
 
-    public static int getInt(String name, int minValue, int maxValue) throws utils.ConfigException {
+    public static int getInt(String name, int minValue, int maxValue) throws ConfigException {
         return getInt(name, minValue, maxValue, "must be integer in range ["+minValue+".."+maxValue+"]");
     }
 
-    public static int getInt(String name) throws utils.ConfigException {
+    public static int getInt(String name) throws ConfigException {
         return getInt(name, Integer.MIN_VALUE, Integer.MAX_VALUE, "must be integer");
     }
 
-    public static int getUInt(String name) throws utils.ConfigException {
+    public static int getUInt(String name) throws ConfigException {
         return getInt(name, 0, Integer.MAX_VALUE, "must be non-negative integer");
     }
 
-    public static int getUInt(String name, int limit) throws utils.ConfigException {
+    public static int getUInt(String name, int limit) throws ConfigException {
         return getInt(name, 0, limit-1);
     }
 
-    public static int getPInt(String name) throws utils.ConfigException {
+    public static int getPInt(String name) throws ConfigException {
         return getInt(name, 1, Integer.MAX_VALUE, "must be positive integer");
     }
 }

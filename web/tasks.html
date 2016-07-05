@@ -92,7 +92,7 @@
                                             <th>Цена выполнения</th>
                                             <$ if (path.endsWith('/all')) { $><th>Дата создания</th><$ } $>
                                             <$ if (path.endsWith('/open')) { $><th>Дата появления</th><$ } $>
-                                            <$ if (path.endsWith('/work')) { $><th>Дата взятия в работу</th><$ } $>
+                                            <$ if (path.endsWith('/work')) { $><th>Время взятия в работу</th><th>Время окончания</th><$ } $>
                                             <$ if (path.endsWith('/complete')) { $><th>Дата завершения</th><$ } $>
                                             <$ if (path.endsWith('/confirm')) { $><th>Дата утверждения</th><$ } $>
                                             <$ if (user.role.name()=='ADMIN') { $><th>Статус</th><$ } $>
@@ -115,7 +115,8 @@
                                             <td>${tasks[i].price}</td>
                                             <$ if (path.endsWith('/all')) { $><td>${tasks[i].created ? dateFormat.format(tasks[i].created) : ""}</td><$ } $>
                                             <$ if (path.endsWith('/open')) { $><td>${tasks[i].started ? dateFormat.format(tasks[i].started) : ""}</td><$ } $>
-                                            <$ if (path.endsWith('/work')) { $><td>${tasks[i].taken ? dateFormat.format(tasks[i].taken) : ""}</td><$ } $>
+                                            <$ if (path.endsWith('/work')) { $><td>${tasks[i].taken ? datetimeFormat.format(tasks[i].taken).replace(" ", "&nbsp;&nbsp;") : ""}</td>
+                                            <td>${tasks[i].taken && tasks[i].timeLimit ? datetimeFormat.format(tasks[i].endDate()).replace(" ", "&nbsp;&nbsp;") : ""}</td><$ } $>
                                             <$ if (path.endsWith('/complete')) { $><td>${tasks[i].completed ? dateFormat.format(tasks[i].completed) : ""}</td><$ } $>
                                             <$ if (path.endsWith('/confirm')) { $><td>${tasks[i].confirmed ? dateFormat.format(tasks[i].confirmed) : ""}</td><$ } $>
                                             <$ if (user.role.name()=='ADMIN') { $><td>${tasks[i].state.name()=='START' ? "запущена" : "остановлена"}</td><$ } $>

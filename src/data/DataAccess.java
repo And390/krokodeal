@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class DataAccess {
@@ -315,6 +316,19 @@ public class DataAccess {
         }
     }
 
+    public void loadTasksToReturn(Consumer<MasterTask> consumer) throws SQLException
+    {
+        try (UtilConnection con = new UtilConnection(dataSource.getConnection());
+             ResultSet resultSet = con.executeQuery(
+                     "select "+MASTER_TASK_FIELDS+" from task left join master_task on task_id=task.id " +
+                     "where task.time_limit>0 and master_task.status='"+WORK+"'"))
+        {
+            while (resultSet.next()) {
+                consumer.accept(mapMasterTask(resultSet));
+            }
+        }
+    }
+
     private List<Task> loadTasks(ResultSet resultSet) throws SQLException
     {
         List<Task> result = new ArrayList<>();
@@ -339,13 +353,16 @@ public class DataAccess {
         {
             Task task;
             if (masterId == null)
+            {
                 try (ResultSet resultSet = con.executeQuery("select "+TASK_FIELDS+", count_limit, time_limit from task where id=?" +
                                                             (status != null ? " and status='"+status.name().toLowerCase()+"'" : ""), taskId))
                 {
                     if (!resultSet.next())  return null;
                     task = mapAdminTask(resultSet);
                 }
+            }
             else
+            {
                 try (ResultSet resultSet = con.executeQuery("select "+MASTER_TASK_FIELDS+" " +
                                                             "from task left join master_task on task_id=? and master_id=? " +
                                                             "where id=?" +
@@ -354,8 +371,7 @@ public class DataAccess {
                     if (!resultSet.next())  return null;
                     task = mapMasterTask(resultSet);
                 }
-            if (masterId!=null)
-            {
+
                 task.messages = new ArrayList<>();
                 try (ResultSet resultSet = con.executeQuery("select type, task_message.id, user.id, user.login, content " +
                                                             "from task_message left join user on author_id=user.id " +
@@ -451,7 +467,7 @@ public class DataAccess {
 
     public boolean resumeTask(int taskId, int masterId) throws SQLException  {
         try (UtilConnection con = new UtilConnection(dataSource.getConnection()))  {
-            return con.executeUpdateOneOrZero("update master_task set status='"+WORK+"' where master_id=? and task_id=? and status='"+COMPLETE+"'",
+            return con.executeUpdateOneOrZero("update master_task set status='"+WORK+"', taken=current_timestamp() where master_id=? and task_id=? and status='"+COMPLETE+"'",
                     masterId, taskId);
         }
     }
@@ -511,7 +527,7 @@ public class DataAccess {
     }
 
     private static final String TASK_FIELDS = "task.id, task.device_id, task.price, task.title, task.description, task.status, task.created, task.started, task.stopped";
-    private static final String MASTER_TASK_FIELDS = TASK_FIELDS+", master_task.master_id, master_task.status, master_task.taken, master_task.completed, master_task.confirmed";
+    private static final String MASTER_TASK_FIELDS = TASK_FIELDS+", task.time_limit, master_task.master_id, master_task.status, master_task.taken, master_task.completed, master_task.confirmed";
 
     private <T extends Task> T mapTask(ResultSet resultSet, T task) throws SQLException
     {
@@ -522,9 +538,9 @@ public class DataAccess {
         task.title = resultSet.getString(++i);
         task.description = resultSet.getString(++i);
         task.state = TaskStatus.valueOf(resultSet.getString(++i).toUpperCase());
-        task.created = resultSet.getDate(++i);
-        task.started = resultSet.getDate(++i);
-        task.stopped = resultSet.getDate(++i);
+        task.created = resultSet.getTimestamp(++i);
+        task.started = resultSet.getTimestamp(++i);
+        task.stopped = resultSet.getTimestamp(++i);
         return task;
     }
 
@@ -537,19 +553,20 @@ public class DataAccess {
     {
         MasterTask task = mapTask(resultSet, new MasterTask());
         int i = 9;
+        task.timeLimit = resultSet.getInt(++i);
         task.masterId = resultSet.getInt(++i);
         String status = resultSet.getString(++i);
         task.status = status == null ? null : MasterTaskStatus.valueOf(status.toUpperCase());
-        task.taken = resultSet.getDate(++i);
-        task.completed = resultSet.getDate(++i);
-        task.confirmed = resultSet.getDate(++i);
+        task.taken = resultSet.getTimestamp(++i);
+        task.completed = resultSet.getTimestamp(++i);
+        task.confirmed = resultSet.getTimestamp(++i);
         return task;
     }
 
     private MasterTask mapMasterTaskWithLogin(ResultSet resultSet) throws SQLException
     {
         MasterTask task = mapMasterTask(resultSet);
-        int i = 14;
+        int i = 15;
         task.masterLogin = resultSet.getString(++i);
         return task;
     }
