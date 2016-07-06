@@ -1,6 +1,8 @@
 package web;
 
 import data.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.and390.template.TemplateManager;
 
 import javax.script.Bindings;
@@ -14,6 +16,8 @@ import java.net.URISyntaxException;
 
 
 public class AppExceptionMapper extends AbstractEndPoint implements ExceptionMapper<Exception> {
+
+    private static Logger log = LoggerFactory.getLogger(AppExceptionMapper.class);
 
     private TemplateManager templateManager;
 
@@ -29,7 +33,7 @@ public class AppExceptionMapper extends AbstractEndPoint implements ExceptionMap
 
     public Response toResponse(Exception error) {
         if (error instanceof WebApplicationException)  return ((WebApplicationException)error).getResponse();
-        if (!(error instanceof ClientException))  error.printStackTrace();
+        if (!(error instanceof ClientException))  log.error("Error processing request", error);
 
         Response.ResponseBuilder response = Response.status(
                 error instanceof ClientException ? Response.Status.BAD_REQUEST : Response.Status.INTERNAL_SERVER_ERROR);
@@ -49,7 +53,7 @@ public class AppExceptionMapper extends AbstractEndPoint implements ExceptionMap
                 return response.entity(result).type(HTML_TYPE).build();
             }
             catch (Exception e)  {
-                e.printStackTrace();
+                log.error("Error on returning error page", e);
             }
         }
         else if (servletRequest.getMethod().equals("POST"))

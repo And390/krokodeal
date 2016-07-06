@@ -2,16 +2,19 @@ package service;
 
 import data.DataAccess;
 import data.Task;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import util.Config;
 import util.ConfigException;
 
-import java.io.Closeable;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.util.*;
 
-public class TaskReturnScheduler implements Closeable
+public class TaskReturnScheduler implements AutoCloseable
 {
+    private Logger log = LoggerFactory.getLogger(TaskReturnScheduler.class);
+
     private static class Item implements Comparable<Item>
     {
         int taskId;
@@ -78,8 +81,9 @@ public class TaskReturnScheduler implements Closeable
             items.add(item);
             itemsById.put(item, item);
         });
+        log.info("loaded " + items.size() + " tasks to return by time limit");
 
-        thread = new Thread("scheduler") {
+        thread = new Thread("TaskReturnScheduler") {
             @Override
             public void run()
             {
@@ -113,8 +117,9 @@ public class TaskReturnScheduler implements Closeable
                     }
                     catch (Exception e)  {
                         e.printStackTrace();
+                        log.error("TaskReturnScheduler thread error", e);
                         try  {  Thread.sleep(10000);  }  catch (InterruptedException e2)  {
-                            e2.printStackTrace();
+                            log.error("TaskReturnScheduler thread error", e);
                             break;
                         }
                     }
@@ -124,13 +129,13 @@ public class TaskReturnScheduler implements Closeable
         thread.start();
     }
 
-    public void close()
+    public void close() throws InterruptedException
     {
         synchronized (monitor) {
             terminate = true;
             monitor.notify();
         }
-        try { thread.join(); } catch (InterruptedException e) { e.printStackTrace(); }
+        thread.join();
     }
 
     public void schedule(int taskId, int masterId, long time)
@@ -156,11 +161,10 @@ public class TaskReturnScheduler implements Closeable
 
     private void returnTask(Item item)
     {
-        try {
+        try  {
+            log.debug("return task by time limit " + item);
             dataAccess.returnTask(item.taskId, item.masterId);
-        } catch (Exception e) {
-            System.err.println("Error returning task by time limit: "+item);
-            e.printStackTrace();
         }
+        catch (Exception e)  {  log.error("Error returning task by time limit "+item, e);  }
     }
 }

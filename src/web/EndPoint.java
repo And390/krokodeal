@@ -3,6 +3,8 @@ package web;
 import data.*;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.and390.template.TemplateManager;
 import service.MailSender;
 import service.TaskReturnScheduler;
@@ -37,6 +39,8 @@ import static data.MasterTaskStatus.*;
 
 @Path("/")
 public class EndPoint extends AbstractEndPoint {
+
+    private static Logger log = LoggerFactory.getLogger(EndPoint.class);
 
     // TODO not authorized и not logged in надо разделить - только в первом случае клиент должен обновлять страницу (а лучше еще мессадж прокидывать при релоаде)
 
@@ -124,7 +128,7 @@ public class EndPoint extends AbstractEndPoint {
         if (user == null)
             throw new ClientException("Пользователь с таким логином уже существует");
         try  {  mailSender.send(login, registerMailSubject, registerMailText.replace("${login}", login));  }
-        catch (MessagingException e)  {  e.printStackTrace();  }
+        catch (MessagingException e)  {  log.error("Error sending mail", e);  }
         return ApiResponse.success();
     }
 

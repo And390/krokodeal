@@ -12,6 +12,8 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.and390.template.TemplateManager;
 import ru.and390.template.WatchFileTemplateManager;
 import service.MailSender;
@@ -32,6 +34,8 @@ import java.util.List;
 
 
 public class Starter {
+
+    private static Logger log = LoggerFactory.getLogger(Starter.class);
 
     private static <T> T add(Collection<? super T> collection, T elem)  {  collection.add(elem);  return elem;  }
 
@@ -98,10 +102,10 @@ public class Starter {
 
         try {
             jettyServer.start();
-            System.out.println("Server started on port " + port);
+            log.info("Server started on port " + port);
             jettyServer.join();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Application error", e);
         } finally {
             jettyServer.destroy();
         }
@@ -109,7 +113,7 @@ public class Starter {
         }  finally  {
             for (AutoCloseable closeable : closeables)
                 try  {  closeable.close();  }
-                catch (Throwable e)  {  e.printStackTrace();  }
+                catch (Throwable e)  {  log.error("error on close {}", closeable);  }
         }
     }
 }
