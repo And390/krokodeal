@@ -55,7 +55,7 @@ public class Starter {
         DataAccess dataAccess = new DataAccess(dataSource);
         TaskReturnScheduler taskReturnScheduler = add(closeables, new TaskReturnScheduler(dataAccess));
         MailSender mailSender = new MailSender();
-        EndPoint endPoint = new EndPoint(dataAccess, taskReturnScheduler, mailSender, templateManager);
+        EndPoint endPoint = add(closeables, new EndPoint(dataAccess, taskReturnScheduler, mailSender, templateManager));
 
         //  initialize server
         int port = Config.getUInt("server.port");

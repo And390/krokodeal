@@ -21,4 +21,9 @@ public class MailSender
         MailUtil.send(Config.getProperties(), email, subject, text);
     }
 
+    public void send(String[] emails, String subject, String text) throws MessagingException
+    {
+        MailUtil.send(Config.getProperties(), emails, subject, text);
+    }
+
 }

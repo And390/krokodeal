@@ -32,13 +32,17 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static data.UserRole.ADMIN;
 import static data.UserRole.MASTER;
 import static data.MasterTaskStatus.*;
 
 @Path("/")
-public class EndPoint extends AbstractEndPoint {
+public class EndPoint extends AbstractEndPoint implements AutoCloseable {
 
     private static Logger log = LoggerFactory.getLogger(EndPoint.class);
 
@@ -55,6 +59,18 @@ public class EndPoint extends AbstractEndPoint {
     private final SimpleDateFormat dateFormat;
     private final SimpleDateFormat datetimeFormat;
 
+    private final ScheduledExecutorService scheduler;
+    private volatile ConcurrentHashMap<Integer, Integer> feedbackCounts = null;
+    private final String[] feedbackRecipients;
+    private final String feedbackSubjectTemplate;
+    private final String feedbackContentTemplate;
+    private final int feedbackLimit;
+    private final int feedbackLimitDuration;
+
+    private final String[] commentsMailRecipients;
+    private final String commentsMailSubjectTemplate;
+    private final String commentsMailContentTemplate;
+
     public EndPoint(DataAccess dataAccess, TaskReturnScheduler taskReturnScheduler, MailSender mailSender, TemplateManager templateManager) {
         this.dataAccess = dataAccess;
         this.taskReturnScheduler = taskReturnScheduler;
@@ -64,6 +80,22 @@ public class EndPoint extends AbstractEndPoint {
         this.registerMailText = Config.getNotEmpty("register.mail.text");
         this.dateFormat = new SimpleDateFormat(Config.getNotEmpty("web.def.dateformat").replace("m", "M").replace("yy", "yyyy"));
         this.datetimeFormat = new SimpleDateFormat(Config.getNotEmpty("web.def.datetimeformat"));
+        this.feedbackRecipients = Util.slice(Config.getNotEmpty("feedback.recipients"), ',');
+        this.feedbackSubjectTemplate = Config.get("feedback.subject");
+        this.feedbackContentTemplate = Config.get("feedback.content");
+        this.feedbackLimit = Config.getPInt("feedback.limit");
+        this.feedbackLimitDuration = Config.getPInt("feedback.limit.duration");
+        this.commentsMailRecipients = Util.slice(Config.getNotEmpty("comments.mail.recipients"), ',');
+        this.commentsMailSubjectTemplate = Config.get("comments.mail.subject");
+        this.commentsMailContentTemplate = Config.get("comments.mail.content");
+
+        scheduler = Executors.newSingleThreadScheduledExecutor((r) -> new Thread(r, "Scheduler"));
+        scheduler.scheduleWithFixedDelay(() -> feedbackCounts = new ConcurrentHashMap<>(), 0, feedbackLimitDuration, TimeUnit.SECONDS);
+    }
+
+    public void close()
+    {
+        scheduler.shutdown();
     }
 
     @Override
@@ -72,6 +104,18 @@ public class EndPoint extends AbstractEndPoint {
         bindings.put("dateFormat", dateFormat);
         bindings.put("datetimeFormat", datetimeFormat);
         return bindings;
+    }
+
+    private void sendMail(String to, String subject, String content)
+    {
+        try  {  mailSender.send(to, subject, content);  }
+        catch (MessagingException e)  {  log.error("Error sending mail", e);  }
+    }
+
+    private void sendMail(String[] to, String subject, String content)
+    {
+        try  {  mailSender.send(to, subject, content);  }
+        catch (MessagingException e)  {  log.error("Error sending mail", e);  }
     }
 
     @GET  @Produces(HTML_TYPE)
@@ -110,6 +154,7 @@ public class EndPoint extends AbstractEndPoint {
     {
         User user = dataAccess.loadUser(login);
         if (login != null && password != null && user != null && Arrays.equals(user.password, passwordServerHash(login, password)))  {
+            log.info("login user id={}", user.id);
             HttpSession session = request.getSession();
             session.setAttribute("user", user);
             session.setMaxInactiveInterval(remember ? 0 : 10*60);
@@ -127,8 +172,8 @@ public class EndPoint extends AbstractEndPoint {
         User user = dataAccess.createUser(login, passwordServerHash(login, password), UserRole.MASTER);
         if (user == null)
             throw new ClientException("Пользователь с таким логином уже существует");
-        try  {  mailSender.send(login, registerMailSubject, registerMailText.replace("${login}", login));  }
-        catch (MessagingException e)  {  log.error("Error sending mail", e);  }
+        log.info("register user id={}, login={}", user.id, login);
+        sendMail(login, registerMailSubject, registerMailText.replace("${login}", login));
         return ApiResponse.success();
     }
 
@@ -207,7 +252,16 @@ public class EndPoint extends AbstractEndPoint {
         checkNotEmpty(subject, "subejct");
         checkNotEmpty(content, "content");
         User user = checkRights(request, MASTER);
+        int n = feedbackCounts.compute(user.id, (id, count) -> count==null ? 1 : count + 1);
+        if (n > feedbackLimit) {
+            log.warn("feedback limit ({}) for user id={}, login={}", n, user.id, user.login);
+            throw new ClientException("Вы исчерпали количество сообщений, попробуйте позже");
+        }
+        log.info("feedback from user id={}", user.id);
         dataAccess.addFeedback(user.id, subject, content);
+        sendMail(feedbackRecipients,
+                feedbackSubjectTemplate.replace("${login}", user.login).replace("${subject}", subject).replace("${content}", content),
+                feedbackContentTemplate.replace("${login}", user.login).replace("${subject}", subject).replace("${content}", content));
         return ApiResponse.success();
     }
 
@@ -474,7 +528,7 @@ public class EndPoint extends AbstractEndPoint {
     public ApiResponse postAddTaskMessage(@Context HttpServletRequest request, @PathParam("id") Integer id, @FormParam("message") String message) throws Exception
     {
         User user = checkRights(request, MASTER);
-        return postAddTaskMessage(id, user.id, user.id, message);
+        return postAddTaskMessage(id, user.id, user.id, message, user.login);
     }
 
     @POST  @Path("/tasks/{id}/{masterId}/add_message")  @Produces(JSON_TYPE)
@@ -482,15 +536,21 @@ public class EndPoint extends AbstractEndPoint {
     {
         User user = checkRights(request, ADMIN);
         checkNotNull(masterId, "masterId");
-        return postAddTaskMessage(id, masterId, user.id, message);
+        return postAddTaskMessage(id, masterId, user.id, message, null);
     }
 
-    private ApiResponse postAddTaskMessage(Integer id, int masterId, int authorId, String message) throws Exception
+    private ApiResponse postAddTaskMessage(Integer id, int masterId, int authorId, String message, String doSendMailFrom) throws Exception
     {
         checkNotNull(id, "id");
         checkNotEmpty(message, "message");
         if (!dataAccess.addTaskMessage(id, masterId, authorId, message)) {
             throw new ClientException("По этой задаче невозможно отправить сообщение");
+        }
+        if (doSendMailFrom != null) {
+            log.info("comment from master id={} for task id={}", authorId, id);
+            sendMail(commentsMailRecipients,
+                     commentsMailSubjectTemplate.replace("${login}", doSendMailFrom).replace("${content}", message),
+                     commentsMailContentTemplate.replace("${login}", doSendMailFrom).replace("${content}", message));
         }
         return ApiResponse.success();
     }
