@@ -606,12 +606,28 @@ public class EndPoint extends AbstractEndPoint implements AutoCloseable {
         return templateManager.eval("/finance.html", bindings);
     }
 
-    @GET  @Path("/statistics")  @Produces(HTML_TYPE)
-    public String getStatistics(@Context HttpServletRequest request) throws Exception
+    @GET  @Path("/statistics/payments")  @Produces(HTML_TYPE)
+    public String getStatisticsPayments(@Context HttpServletRequest request, @QueryParam("from") String from, @QueryParam("to") String to) throws Exception
     {
+        Date fromDate = checkOptDate(from);
+        Date toDate = checkOptDateEnd(to);
         User user = checkRights(request, ADMIN);
+        List<MasterStat> masters = dataAccess.loadMastersStatistics(fromDate, toDate, false);
         Bindings bindings = createBindings(request, user);
-        return templateManager.eval("/statistics.html", bindings);
+        bindings.put("masters", masters);
+        return templateManager.eval("/statistics_payments.html", bindings);
+    }
+
+    @GET  @Path("/statistics/masters")  @Produces(HTML_TYPE)
+    public String getStatisticsMasters(@Context HttpServletRequest request, @QueryParam("from") String from, @QueryParam("to") String to) throws Exception
+    {
+        Date fromDate = checkOptDate(from);
+        Date toDate = checkOptDateEnd(to);
+        User user = checkRights(request, ADMIN);
+        List<MasterStat> masters = dataAccess.loadMastersStatistics(fromDate, toDate, true);
+        Bindings bindings = createBindings(request, user);
+        bindings.put("masters", masters);
+        return templateManager.eval("/statistics_masters.html", bindings);
     }
 
 

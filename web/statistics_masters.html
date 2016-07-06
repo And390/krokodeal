@@ -37,7 +37,47 @@
 
         <!-- Begin: Content-->
         <div id="content" class="animated fadeIn">
-            Coming soon...
+            <div class="row">
+                <div class="col-md-12">
+                    <ul class="nav nav-tabs">
+                        <li ${path.endsWith('/payments') ? "class='active'" : ""}><a href="payments">Начисления</a></li>
+                        <li ${path.endsWith('/masters') ? "class='active'" : ""}><a href="masters">Мастера</a></li>
+                    </ul>
+                    <div class="tab-content">
+                        <div class="panel">
+                            <div class="panel-body">
+                                <div class="table-responsive">
+                                    <table class="table admin-form theme-warning fs13">
+                                        <thead>
+                                        <tr class="bg-light">
+                                            <th>Дата регистрации</th>
+                                            <th>Почта</th>
+                                            <th>Кошелек</th>
+                                            <th>Выполненых задач</th>
+                                            <th>Общий заработок</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <$  for (var i=0; i < masters.length; i++)  {  $>
+                                        <tr>
+                                            <td>${dateFormat.format(masters[i].created)}</td>
+                                            <td>${masters[i].login}</td>
+                                            <td>${masters[i].walletNum}</td>
+                                            <td>${masters[i].confirmedCount}</td>
+                                            <td>${masters[i].confirmedAmount}</td>
+                                        </tr>
+                                        <$  }  $>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+
+            </div>
         </div>
     </section>
 </div>

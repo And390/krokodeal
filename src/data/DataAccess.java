@@ -87,6 +87,41 @@ public class DataAccess {
         }
     }
 
+    public List<MasterStat> loadMastersStatistics(Date startDate, Date endDate, boolean showZero) throws SQLException
+    {
+        try (UtilConnection con = new UtilConnection(dataSource.getConnection()))
+        {
+            StringBuilder query = new StringBuilder("select user.id, login, user.created, city, phone, male, age, wallet_id, wallet_num, count(task_id), sum(price) " +
+                                                    "from master_info inner join user on user.id=user_id " +
+                                                    (showZero ? "left" : "inner")+" join master_task on user.id=master_id and master_task.status='"+CONFIRM+"' " +
+                                                    (showZero ? "left" : "inner")+" join task on task_id=task.id ");
+            appendCondition(query, "confirmed", startDate, endDate, true);
+            query.append("group by user.id, login, user.created, city, phone, male, age, wallet_id, wallet_num");
+
+            try (ResultSet rs = con.executeQuery(query.toString(), params(startDate, endDate)))  {
+                ArrayList<MasterStat> result = new ArrayList<>();
+                while (rs.next())
+                {
+                    MasterStat stat = new MasterStat();
+                    int i = 0;
+                    stat.id = rs.getInt(++i);
+                    stat.login = rs.getString(++i);
+                    stat.created = rs.getDate(++i);
+                    stat.city = rs.getString(++i);
+                    stat.phone = rs.getString(++i);
+                    stat.male = (Boolean)rs.getObject(++i);
+                    stat.age = (Integer)rs.getObject(++i);
+                    stat.walletType = rs.getInt(++i);
+                    stat.walletNum = rs.getString(++i);
+                    stat.confirmedCount = rs.getInt(++i);
+                    stat.confirmedAmount = rs.getInt(++i);
+                    result.add(stat);
+                }
+                return result;
+            }
+        }
+    }
+
     public List<Integer> loadMasterDevices(int userId) throws SQLException
     {
         try (UtilConnection con = new UtilConnection(dataSource.getConnection()))
