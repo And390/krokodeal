@@ -1,3 +1,5 @@
+set names 'utf8';
+
 drop table if exists task_message;
 drop table if exists master_task;
 drop table if exists task;

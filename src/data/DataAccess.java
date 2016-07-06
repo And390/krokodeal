@@ -526,6 +526,18 @@ public class DataAccess {
         }
     }
 
+    public int calcPayments(int masterId, Date startDate, Date endDate) throws SQLException
+    {
+        StringBuilder query = new StringBuilder(
+                "select sum(price) from task inner join master_task on id=task_id where master_id=? and master_task.status='"+CONFIRM+"' ");
+        appendCondition(query, "confirmed", startDate, endDate, false);
+
+        try (UtilConnection con = new UtilConnection(dataSource.getConnection()))
+        {
+            return con.executeIntQuery(query.toString(), excludeNulls(masterId, startDate, endDate));
+        }
+    }
+
     private static final String TASK_FIELDS = "task.id, task.device_id, task.price, task.title, task.description, task.status, task.created, task.started, task.stopped";
     private static final String MASTER_TASK_FIELDS = TASK_FIELDS+", task.time_limit, master_task.master_id, master_task.status, master_task.taken, master_task.completed, master_task.confirmed";
 

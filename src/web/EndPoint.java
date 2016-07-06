@@ -592,15 +592,19 @@ public class EndPoint extends AbstractEndPoint implements AutoCloseable {
         return ApiResponse.success();
     }
 
-//    @POST  @Path("/payments")  @Produces(JSON_TYPE)
-//    public ApiResponse getPayments(@Context HttpServletRequest request, @FormParam("from") String from, @FormParam("to") String to) throws Exception
-//    {
-//        User user = checkRights(request, UserRole.ADMIN);
-//        Date fromDate = checkDate(from);
-//        Date toDate = checkDate(to);
-//        List<MasterInfo> masters = dataAccess.loadMasters(fromDate, toDate);
-//        return new ApiResponse(masters, null);
-//    }
+    @GET  @Path("/finance")  @Produces(HTML_TYPE)
+    public String getFinance(@Context HttpServletRequest request, @QueryParam("from") String from, @QueryParam("to") String to) throws Exception
+    {
+        Date fromDate = checkOptDate(from);
+        Date toDate = checkOptDateEnd(to);
+        User user = checkRights(request, MASTER);
+        int payments = dataAccess.calcPayments(user.id, fromDate, toDate);
+        Bindings bindings = createBindings(request, user);
+        bindings.put("from", fromDate);
+        bindings.put("to", toDate);
+        bindings.put("payments", payments);
+        return templateManager.eval("/finance.html", bindings);
+    }
 
     @GET  @Path("/statistics")  @Produces(HTML_TYPE)
     public String getStatistics(@Context HttpServletRequest request) throws Exception
