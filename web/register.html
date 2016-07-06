@@ -114,7 +114,7 @@
                 if (pars.password != confirmPassword)  throw "Пароли не совпадают";
                 pars.password = CryptoJS.PBKDF2(pars.password, "#"+pars.login+"-salt!", { keySize: 128/32, iterations: 100 });
                 action("register", pars, function() {
-                    window.location.href = "/"; // TODO redirect with message
+                    window.location.href = "/";
                 });
             }
             catch (e)

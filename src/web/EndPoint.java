@@ -149,6 +149,8 @@ public class EndPoint extends AbstractEndPoint implements AutoCloseable {
         return templateManager.eval("/register.html", bindings);
     }
 
+    private static final int SHORT_INACTIVE_INTERVAL = 10*60;
+
     @POST  @Path("/login")  @Produces(JSON_TYPE)
     public Object postLogin(@Context HttpServletRequest request, @FormParam("login") String login, @FormParam("password") String password, @FormParam("remember") boolean remember) throws Exception
     {
@@ -157,7 +159,7 @@ public class EndPoint extends AbstractEndPoint implements AutoCloseable {
             log.info("login user id={}", user.id);
             HttpSession session = request.getSession();
             session.setAttribute("user", user);
-            session.setMaxInactiveInterval(remember ? 0 : 10*60);
+            session.setMaxInactiveInterval(remember ? 0 :SHORT_INACTIVE_INTERVAL );
             return ApiResponse.success();
         }
         else
@@ -174,6 +176,9 @@ public class EndPoint extends AbstractEndPoint implements AutoCloseable {
             throw new ClientException("Пользователь с таким логином уже существует");
         log.info("register user id={}, login={}", user.id, login);
         sendMail(login, registerMailSubject, registerMailText.replace("${login}", login));
+        HttpSession session = request.getSession();
+        session.setAttribute("user", user);
+        session.setMaxInactiveInterval(SHORT_INACTIVE_INTERVAL);
         return ApiResponse.success();
     }
 
