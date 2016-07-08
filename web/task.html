@@ -7,7 +7,7 @@
     <meta name="format-detection" content="telephone=no">
     <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <meta http-equiv="X-UA-Compatible" content="IE=Edge">
-    <link rel="icon" href="/assets/img/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/img/favicon.png" type="image/x-icon">
     <!-- Stylesheets-->
     <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Lato:300,400,600,700%7CMontserrat:400,700">
     <link rel="stylesheet" type="text/css" href="/assets/skin/default_skin/css/theme.css">
@@ -65,7 +65,7 @@
                         <$ if (task.state.name()=='STOP' && user.role.name()=='ADMIN') { $><a class="btn btn-info mb10 mr5 notification" data-note-style="info" data-note-stack="stack_bottom_right" href="#" onclick="taskAction('start_task', event)">Запустить</a><$ } $>
                         <$ if (task.state.name()=='START' && user.role.name()=='ADMIN') { $><a class="btn btn-info mb10 mr5 notification" data-note-style="info" data-note-stack="stack_bottom_right" href="#" onclick="taskAction('stop_task', event)">Остановить</a><$ } $>
                         <$ if (!task.status && user.role.name()=='MASTER') { $><a class="btn btn-info mb10 mr5 notification" data-note-style="info" data-note-stack="stack_bottom_right" href="#" onclick="taskAction('take_task', event)">Взять</a><$ } $>
-                        <$ if (task.status && task.status.name()=='WORK' && user.role.name()=='MASTER') { $><a class="btn btn-info mb10 mr5 notification" data-note-style="info" data-note-stack="stack_bottom_right" href="#" onclick="taskAction('complete_task', event)">Выполнить</a><$ } $>
+                        <$ if (task.status && task.status.name()=='WORK' && user.role.name()=='MASTER') { $><a class="btn btn-info mb10 mr5 notification" data-note-style="info" data-note-stack="stack_bottom_right" href="#" onclick="taskAction('complete_task', event)">Выполнено</a><$ } $>
                         <$ if (task.status && task.status.name()=='WORK' && user.role.name()=='MASTER') { $><a class="btn btn-info mb10 mr5 notification" data-note-style="info" data-note-stack="stack_bottom_right" href="#" onclick="taskAction('return_task', event)">Вернуть</a><$ } $>
                         <$ if (task.status && task.status.name()=='COMPLETE' && user.role.name()=='MASTER') { $><a class="btn btn-info mb10 mr5 notification" data-note-style="info" data-note-stack="stack_bottom_right" href="#" onclick="taskAction('resume_task', event)">Возобновить</a><$ } $>
                         <$ if (task.status && task.status.name()=='COMPLETE' && user.role.name()=='ADMIN') { $><a class="btn btn-info mb10 mr5 notification" data-note-style="info" data-note-stack="stack_bottom_right" href="#" onclick="taskAction('reject_task', event)">Вернуть</a><$ } $>
