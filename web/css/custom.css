@@ -7,3 +7,6 @@
 .comment-author {
     font-weight: bold;
 }
+.panel-heading {
+    height: 36px;
+}
