@@ -1,5 +1,10 @@
+<script src="http://noreferer.ru/anonymize.js" type="text/javascript"></script>
 <script type="text/javascript">
+    var protected_links = "";
+
     jQuery(document).ready(function () {
+        auto_anonymize();
+
         $('#logout').click(function(event) {
             event.preventDefault();
             action("logout", {}, reloadPage);
