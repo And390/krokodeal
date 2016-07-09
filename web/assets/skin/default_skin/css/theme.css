@@ -19353,7 +19353,7 @@ body.sb-top #toggle_sidemenu_t {
   background-color: #02c385;
 }
 .navbar.bg-info {
-  background-color: #3bba65;
+  background-color: #30b5e1;
 }
 .navbar.bg-info .nav > li.open > a,
 .navbar.bg-info .nav > li:hover > a,
@@ -19362,7 +19362,7 @@ body.sb-top #toggle_sidemenu_t {
 .navbar.bg-info .nav > li > a:hover,
 .navbar.bg-info .nav > li > a:focus {
   color: #FFF;
-  background-color: #319b54;
+  background-color: #1fa7d4;
 }
 .navbar.bg-info .nav > li.dropdown.open .dropdown-menu,
 .navbar.bg-info .nav > li.dropdown .open .dropdown-menu {
@@ -22928,11 +22928,11 @@ a.bg-success:hover {
   color: #fff;
 }
 .bg-info {
-  background-color: #3bba65 !important;
+  background-color: #30b5e1 !important;
   color: #e2f5fb;
 }
 a.bg-info:hover {
-  background-color: #246F38 !important;
+  background-color: #1c99c2 !important;
 }
 .bg-info .text-muted {
   color: #afe8fb;
@@ -22947,10 +22947,10 @@ a.bg-info:hover {
   background-color: #5dc5e7 !important;
 }
 .bg-info.dark {
-  background-color: #3aae5a !important;
+  background-color: #1fa7d4 !important;
 }
 .bg-info.darker {
-  background-color: #35a556 !important;
+  background-color: #1c99c2 !important;
 }
 .bg-info .open > a,
 .bg-info .open > a:hover,

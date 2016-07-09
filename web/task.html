@@ -50,7 +50,7 @@
               <!-- Field о себе-->
               <div class="panel">
                 <div class="panel-heading br-b"><span class="panel-title black">${task.title}</span></div>
-                <div class="panel-body">
+                <div class="panel-body form-horizontal">
                     <div class="col-md-12"><p>${task.description}</p></div>
                     <div class="col-md-2"><p>Цена</p></div>  <div class="col-md-9"><p>${task.price} руб.</p></div>
                     <div class="col-md-2"><p>Тип устройства</p></div>  <div class="col-md-9"><p>&nbsp;</p></div>
@@ -87,29 +87,35 @@
                         };  $>
 
                     <$  if (task.messages)  for (var i=0; i < task.messages.length; i++)  {  $>
-                    <div class="col-md-2" style="padding-top: 15px;">
-                 		<p>${task.messages[i].user ? task.messages[i].user.login : ""}</p>
-                 	</div>
-                 	<div class="col-md-9" style="padding-top: 15px;">
-                 		<p>${evaluate(msgTemplate[task.messages[i].type.name()] || otherTemplate);}</p>
-                 	</div>
+                    <div class="form-group">
+                        <div class="col-md-2 pt15 comment-author">
+                            <p>${task.messages[i].user ? task.messages[i].user.login : ""}</p>
+                        </div>
+                        <div class="col-md-9 pt15 comment">
+                            <p>${evaluate(msgTemplate[task.messages[i].type.name()] || otherTemplate);}</p>
+                        </div>
+                    </div>
                     <$  }  $>
 
                     <$  if (task.masterId!=null)  {  $>
-                    <table>
-                        <tr>
-                            <td>
-                                <textarea id="input.message"></textarea><br>
-                                <input type="button" value="отправить" onclick="sendMessage()">
-                            </td>
-                            <td>
-                                <form name="sendImageForm">
-                                    <input type="file" id="input.image" name="image"><br>
-                                    <input type="button" value="отправить" onclick="sendImage()"><br>
-                                </form>
-                            </td>
-                        </tr>
-                    </table>
+                    <div class="form-group has-primary">
+                        <div class="col-md-2">
+                        </div>
+                        <div class="col-lg-7">
+                            <textarea id="input.message" class="form-control black" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="form-group has-primary">
+                        <div class="col-md-2">
+                        </div>
+                        <div class="col-lg-7">
+                            <form name="sendImageForm">
+                                <input type="button" class="btn btn-info mb10 mr5" value="отправить" onclick="sendMessage()">
+                                <input type="file" id="imageUploadInput" name="image" onchange="sendImage()" style="display: none">
+                                <input type="button" class="btn btn-info mb10 mr5" value="отправить изображение" onclick="$('#imageUploadInput').click();"><br>
+                            </form>
+                        </div>
+                    </div>
                      <$  }  $>
                 </div>
               </div>
