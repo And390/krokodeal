@@ -72,7 +72,7 @@
                         <$ if (task.status && task.status.name()=='COMPLETE' && user.role.name()=='ADMIN') { $><a class="btn btn-info mb10 mr5 notification" data-note-style="info" data-note-stack="stack_bottom_right" href="#" onclick="taskAction('confirm_task', event)">Подтвердить</a><$ } $>
                  	</div>
 
-                    <$ var textTemplate = :$>${task.messages[i].content}<$: ; $>
+                    <$ var textTemplate = :$>${task.messages[i].content #h}<$: ; $>
                     <$ var imgTemplate = :$><img src="${root}/task_message?id=${task.messages[i].id}"><$: ; $>
                     <$ var otherTemplate = :$>???<$: ; $>
                     <$  var msgTemplate = {
@@ -89,7 +89,7 @@
                     <$  if (task.messages)  for (var i=0; i < task.messages.length; i++)  {  $>
                     <div class="form-group">
                         <div class="col-md-2 pt15 comment-author">
-                            <p>${task.messages[i].user ? task.messages[i].user.login : ""}</p>
+                            <p>${task.messages[i].user ? task.messages[i].user.login : "" #h}</p>
                         </div>
                         <div class="col-md-9 pt15 comment">
                             <p>${evaluate(msgTemplate[task.messages[i].type.name()] || otherTemplate);}</p>

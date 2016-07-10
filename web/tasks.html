@@ -106,7 +106,7 @@
                                         <$  for (var i=0; i < tasks.length; i++)  {  $>
                                         <tr>
                                             <$  if (path.endsWith('/master'))  {  $>
-                                            <td>${tasks[i].masterLogin}</td>
+                                            <td>${tasks[i].masterLogin #h}</td>
                                             <td>${getStatus(tasks[i].status)}</td>
                                             <td>${tasks[i].taken ? dateFormat.format(tasks[i].taken) : ""}</td>
                                             <$  }  $>
