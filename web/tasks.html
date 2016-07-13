@@ -96,6 +96,7 @@
                                             <$ if (path.endsWith('/complete')) { $><th>Дата завершения</th><$ } $>
                                             <$ if (path.endsWith('/confirm')) { $><th>Дата утверждения</th><$ } $>
                                             <$ if (user.role.name()=='ADMIN') { $><th>Статус</th><$ } $>
+                                            <$ if (path.endsWith('/all')) { $><th>Выполнено</th><th>Осталось</th><$ } $>
                                             <th></th>
                                         </tr>
                                         </thead>
@@ -120,6 +121,7 @@
                                             <$ if (path.endsWith('/complete')) { $><td>${tasks[i].completed ? dateFormat.format(tasks[i].completed) : ""}</td><$ } $>
                                             <$ if (path.endsWith('/confirm')) { $><td>${tasks[i].confirmed ? dateFormat.format(tasks[i].confirmed) : ""}</td><$ } $>
                                             <$ if (user.role.name()=='ADMIN') { $><td>${tasks[i].state.name()=='START' ? "запущена" : "остановлена"}</td><$ } $>
+                                            <$ if (path.endsWith('/all')) { $><td>${tasks[i].confirmedCount}</td><td>${tasks[i].countLimit ? tasks[i].countLimit-tasks[i].confirmedCount : ""}</td><$ } $>
                                             <td class="text-right">
                                                 <div class="btn-group text-right">
                                                     <a href="/tasks/${tasks[i].id + (path.endsWith('/master') ? '/'+tasks[i].masterId: '')}" class="btn btn-info br2 btn-xs fs12">

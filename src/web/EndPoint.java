@@ -276,7 +276,7 @@ public class EndPoint extends AbstractEndPoint implements AutoCloseable {
         Date fromDate = checkOptDate(from);
         Date toDate = checkOptDateEnd(to);
         User user = checkRights(request, ADMIN);
-        return getTasks(request, user, dataAccess.loadTasks(fromDate, toDate));
+        return getTasks(request, user, dataAccess.loadAllTasks(fromDate, toDate));
     }
 
     @GET  @Path("/tasks/master")  @Produces(HTML_TYPE)
@@ -586,7 +586,7 @@ public class EndPoint extends AbstractEndPoint implements AutoCloseable {
         checkNotEmpty(disposition.getFileName(), "filename extension");
         TaskMessage.Type type = TaskMessage.Type.byExtension.get(extension);
         if (type == null)  throw new ClientException("Неизвестный тип файла: "+extension);
-        if (!dataAccess.addTaskMessage(id, masterId, authorId, type, ByteArray.read(image))) {
+        if (!dataAccess.addTaskMessage(id, masterId, authorId, type, image)) {
             throw new ClientException("По этой задаче невозможно отправить сообщение");
         }
         return ApiResponse.success();
@@ -644,30 +644,30 @@ public class EndPoint extends AbstractEndPoint implements AutoCloseable {
         return user;
     }
 
-    private void checkNotNull(Object value, String name)
+    private static void checkNotNull(Object value, String name)
     {
         if (value==null)  throw new ClientException("No parameter '" + name + "'");
     }
 
-    private void checkNotEmpty(String value, String name)
+    private static void checkNotEmpty(String value, String name)
     {
         checkNotNull(value, name);
         if (value.length()==0)  throw new ClientException("Empty parameter value '" + name + "'");
     }
 
-    private void checkNotEmpty(byte[] value, String name)
+    private static void checkNotEmpty(byte[] value, String name)
     {
         checkNotNull(value, name);
         if (value.length==0)  throw new ClientException("Empty parameter value '" + name + "'");
     }
 
-    private void checkPositive(Integer value, String name)
+    private static void checkPositive(Integer value, String name)
     {
         checkNotNull(value, name);
         if (value <= 0)  throw new ClientException("Parameter value must be > 0 for '" + name +"'");
     }
 
-    private void checkInt(Integer value, int min, int max, String name)
+    private static void checkInt(Integer value, int min, int max, String name)
     {
         checkNotNull(value, name);
         if (value < min)  throw new ClientException("Parameter value must be >= "+min+" for '"+name+"'");
@@ -733,13 +733,26 @@ public class EndPoint extends AbstractEndPoint implements AutoCloseable {
         else  return hex;
     }
 
-    public static class InsertUser
-    {
+    public static class InsertUser {
         public static void main(String[] args) throws Exception {
             try (SingleConnectionDataSource dataSource = DataAccess.createTestDataSource())
             {
                 DataAccess dataAccess = new DataAccess(dataSource);
                 dataAccess.createUser(args[1], passwordTotalHash(args[1], args[2]), UserRole.valueOf(args[0].toUpperCase()));
+            }
+        }
+    }
+
+    public static class ChangePassword {
+        public static void main(String[] args) throws Exception {
+            try (SingleConnectionDataSource dataSource = DataAccess.createTestDataSource())
+            {
+                DataAccess dataAccess = new DataAccess(dataSource);
+                User user = dataAccess.loadUser(args[0]);
+                if (user == null) {
+                    throw new Exception("user not found");
+                }
+                dataAccess.updatePassword(user.id, passwordTotalHash(user.login, args[1]));
             }
         }
     }

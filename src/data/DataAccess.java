@@ -245,17 +245,22 @@ public class DataAccess {
         }
     }
 
-    public List<Task> loadTasks(Date startDate, Date endDate) throws SQLException
+    public List<Task> loadAllTasks(Date startDate, Date endDate) throws SQLException
     {
         StringBuilder query = new StringBuilder();
-        query.append("select " + TASK_FIELDS + " from task ");
+        query.append("select "+TOTAL_TASK_FIELDS+" from task left join master_task on task_id=task.id and master_task.status='"+CONFIRM+"' ");
         appendCondition(query, "created", startDate, endDate, true);
+        query.append("group by " + TASK_FIELDS + " ");
         query.append("order by id limit 1000");
 
         try (UtilConnection con = new UtilConnection(dataSource.getConnection());
              ResultSet resultSet = con.executeQuery(query.toString(), params(startDate, endDate)))
         {
-            return loadTasks(resultSet);
+            List<Task> result = new ArrayList<>();
+            while (resultSet.next())  {
+                result.add(mapTotalTask(resultSet));
+            }
+            return result;
         }
     }
 
@@ -276,29 +281,6 @@ public class DataAccess {
         Object[] result = new Object[count];
         for (int i=0, j=0; i<params.length; i++)  if (params[i]!=null)  result[j++] = params[i];
         return result;
-    }
-
-    public List<Task> loadTasks(TaskStatus status) throws SQLException
-    {
-        try (UtilConnection con = new UtilConnection(dataSource.getConnection());
-             ResultSet resultSet = con.executeQuery(
-                     "select "+TASK_FIELDS+" " +
-                     "from task where status=? order by id limit 1000", status.name().toLowerCase()))
-        {
-            return loadTasks(resultSet);
-        }
-    }
-
-    public List<Task> loadTasks(TaskStatus status, List<Integer> devices) throws SQLException
-    {
-        try (UtilConnection con = new UtilConnection(dataSource.getConnection());
-             ResultSet resultSet = con.executeQuery(
-                     "select "+TASK_FIELDS+" " +
-                     "from task where status=? and device_id in (?) " +
-                     "order by id limit 1000", status.name().toLowerCase(), devices))
-        {
-            return loadTasks(resultSet);
-        }
     }
 
     public List<MasterTask> loadMasterTasks(Date startDate, Date endDate) throws SQLException
@@ -389,7 +371,7 @@ public class DataAccess {
             Task task;
             if (masterId == null)
             {
-                try (ResultSet resultSet = con.executeQuery("select "+TASK_FIELDS+", count_limit, time_limit from task where id=?" +
+                try (ResultSet resultSet = con.executeQuery("select "+ADMIN_TASK_FIELDS+" from task where id=?" +
                                                             (status != null ? " and status='"+status.name().toLowerCase()+"'" : ""), taskId))
                 {
                     if (!resultSet.next())  return null;
@@ -550,7 +532,7 @@ public class DataAccess {
         }
     }
 
-    public boolean addTaskMessage(int taskId, int masterId, int authorId, TaskMessage.Type type, byte[] image) throws SQLException
+    public boolean addTaskMessage(int taskId, int masterId, int authorId, TaskMessage.Type type, InputStream image) throws SQLException
     {
         try (UtilConnection con = new UtilConnection(dataSource.getConnection()))
         {
@@ -574,6 +556,8 @@ public class DataAccess {
     }
 
     private static final String TASK_FIELDS = "task.id, task.device_id, task.price, task.title, task.description, task.status, task.created, task.started, task.stopped";
+    private static final String ADMIN_TASK_FIELDS = TASK_FIELDS + ", task.count_limit, task.time_limit";
+    private static final String TOTAL_TASK_FIELDS = ADMIN_TASK_FIELDS+", count(master_task.task_id)";
     private static final String MASTER_TASK_FIELDS = TASK_FIELDS+", task.time_limit, master_task.master_id, master_task.status, master_task.taken, master_task.completed, master_task.confirmed";
 
     private <T extends Task> T mapTask(ResultSet resultSet, T task) throws SQLException
@@ -596,6 +580,23 @@ public class DataAccess {
         return mapTask(resultSet, new Task());
     }
 
+    private Task mapAdminTask(ResultSet resultSet) throws SQLException
+    {
+        Task task = mapTask(resultSet);
+        int i = 9;
+        task.countLimit = resultSet.getInt(++i);
+        task.timeLimit = resultSet.getInt(++i);
+        return task;
+    }
+
+    private Task mapTotalTask(ResultSet resultSet) throws SQLException
+    {
+        Task task = mapAdminTask(resultSet);
+        int i = 11;
+        task.confirmedCount = resultSet.getInt(++i);
+        return task;
+    }
+
     private MasterTask mapMasterTask(ResultSet resultSet) throws SQLException
     {
         MasterTask task = mapTask(resultSet, new MasterTask());
@@ -615,15 +616,6 @@ public class DataAccess {
         MasterTask task = mapMasterTask(resultSet);
         int i = 15;
         task.masterLogin = resultSet.getString(++i);
-        return task;
-    }
-
-    private Task mapAdminTask(ResultSet resultSet) throws SQLException
-    {
-        Task task = mapTask(resultSet);
-        int i = 9;
-        task.countLimit = resultSet.getInt(++i);
-        task.timeLimit = resultSet.getInt(++i);
         return task;
     }
 }

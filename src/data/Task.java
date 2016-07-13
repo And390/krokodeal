@@ -20,5 +20,7 @@ public class Task
     public Date started;
     public Date stopped;
 
+    public int confirmedCount;
+
     public static final TimeUnit LIMIT_TIME_UNIT = TimeUnit.MINUTES;
 }

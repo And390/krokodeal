@@ -52,7 +52,7 @@
                                     <div class="col-lg-8">
                                         <select id="device" class="form-control black">
                                             <$  for (var i=0; i < devices.length; i++)  {  $>
-                                            <option value="${devices[i].id}">${devices[i].title}</option>
+                                            <option value="${devices[i].id}" ${task && task.deviceId==devices[i].id ? " selected" : ""}>${devices[i].title}</option>
                                             <$  }  $>
                                         </select>
                                     </div>
