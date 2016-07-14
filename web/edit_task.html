@@ -2,8 +2,9 @@
 <html lang="ru">
 <head>
     <!-- Site Title-->
+    <$  var isNew = task && !path.endsWith('/copy');  $>
     <meta charset="UTF-8">
-    <title>${task ? "Редактирование" : "Создание"} задачи</title>
+    <title>${isNew ? "Редактирование" : "Создание"} задачи</title>
     <meta name="format-detection" content="telephone=no">
     <meta name="viewport"
           content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
@@ -38,7 +39,7 @@
             <div class="row">
                 <div class="col-md-12">
                     <div class="panel">
-                        <div class="panel-heading br-b"><span class="panel-title black">${task ? "Редактирование" : "Создание"} задачи</span></div>
+                        <div class="panel-heading br-b"><span class="panel-title black">${isNew ? "Редактирование" : "Создание"} задачи</span></div>
                         <div class="panel-body">
                             <form role="form" class="form-horizontal">
                                 <div class="form-group has-primary">
@@ -85,7 +86,7 @@
                                     <label class="col-lg-3 control-label"></label>
                                     <div class="col-lg-8">
                                         <a id="submitTask" class="btn btn-info mb10 mr5 notification" data-note-style="info"
-                                           data-note-stack="stack_bottom_right" href="#">${task ? "Сохранить" : "Создать"}</a>
+                                           data-note-stack="stack_bottom_right" href="#">${isNew ? "Сохранить" : "Создать"}</a>
                                     </div>
                                 </div>
                             </form>
@@ -134,7 +135,7 @@
                 if (!params.description)  throw "Описание должно быть не пустым";
                 if (params.count && (params.count==="0" || !params.count.match(/[0-9]+/)))  throw "Количество выполнений должно быть положительным числом";
                 if (params.time && (params.time==="0" || !params.time.match(/[0-9]+/)))  throw "Время выполнения должно быть положительным числом";
-                <$  if (task)  {  $>
+                <$  if (isNew)  {  $>
                 action("tasks/${task.id}/edit", params, function () {  success("сохранено");  window.location.href = "/tasks/${task.id}";  });
                 <$  } else {  $>
                 action("tasks/create", params, function () {  success("задача создана");  window.location.href = "/tasks/all";  });

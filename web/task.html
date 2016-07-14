@@ -55,16 +55,19 @@
                     <div class="col-md-2"><p>Цена</p></div>  <div class="col-md-9"><p>${task.price} руб.</p></div>
                     <div class="col-md-2"><p>Тип устройства</p></div>  <div class="col-md-9"><p>&nbsp;</p></div>
                  	<!--div class="col-md-2"><p>Описание</p></div>  <div class="col-md-9"><p>${task.description}</p></div-->
-                    <$  var taskStates = {  START: "открыта", STOP: "закрыта"  };  $>
+                    <$  var taskStates = {  START: "запущено", STOP: "остановлена", CLOSE: "удалена"  };  $>
                     <$  var taskStatuses = {  WORK: "в работе", COMPLETE: "выполнена", CONFIRM: "подтверждена"  };  $>
-                    <div class="col-md-2"><p>Статус</p></div>  <div class="col-md-9"><p>${  (taskStates[task.state.name()] || "?") + (task.masterId==null ? "" : "<br>"+(task.status ? taskStatuses[task.status.name()] || "?" : "не взята"))  }</p></div>
+                    <$ if (user.role.name()=='ADMIN') { $><div class="col-md-2"><p>Статус</p></div>  <div class="col-md-9"><p>${  (taskStates[task.state.name()] || "?") + (task.masterId==null ? "" : "<br>"+(task.status ? taskStatuses[task.status.name()] || "?" : "не взята"))  }</p></div><$ } $>
+                    <$ if (user.role.name()=='MASTER') { $><div class="col-md-2"><p>Статус</p></div>  <div class="col-md-9"><p>${  task.status ? taskStatuses[task.status.name()] || "?" : task.state=='START' ? "не взята" : taskStates[task.state.name()] || "?"  }</p></div><$ } $>
 
                  	<div class="col-md-12 br-b">
                         <br>
                         <$ if (user.role.name()=='ADMIN') { $><a class="btn btn-info mb10 mr5 notification" data-note-style="info" data-note-stack="stack_bottom_right" href="/tasks/${task.id}/edit">Править</a><$ } $>
                         <$ if (task.state.name()=='STOP' && user.role.name()=='ADMIN') { $><a class="btn btn-info mb10 mr5 notification" data-note-style="info" data-note-stack="stack_bottom_right" href="#" onclick="taskAction('start_task', event)">Запустить</a><$ } $>
                         <$ if (task.state.name()=='START' && user.role.name()=='ADMIN') { $><a class="btn btn-info mb10 mr5 notification" data-note-style="info" data-note-stack="stack_bottom_right" href="#" onclick="taskAction('stop_task', event)">Остановить</a><$ } $>
-                        <$ if (!task.status && user.role.name()=='MASTER') { $><a class="btn btn-info mb10 mr5 notification" data-note-style="info" data-note-stack="stack_bottom_right" href="#" onclick="taskAction('take_task', event)">Взять</a><$ } $>
+                        <$ if (task.state.name()=='STOP' && user.role.name()=='ADMIN') { $><a class="btn btn-info mb10 mr5 notification" data-note-style="info" data-note-stack="stack_bottom_right" href="#" onclick="taskAction('close_task', event)">Удалить</a><$ } $>
+                        <$ if (user.role.name()=='ADMIN') { $><a class="btn btn-info mb10 mr5 notification ml60" data-note-style="info" data-note-stack="stack_bottom_right" href="/tasks/${task.id}/copy">Копировать</a><$ } $>
+                        <$ if (!task.status && task.state.name()=='START' && user.role.name()=='MASTER') { $><a class="btn btn-info mb10 mr5 notification" data-note-style="info" data-note-stack="stack_bottom_right" href="#" onclick="taskAction('take_task', event)">Взять</a><$ } $>
                         <$ if (task.status && task.status.name()=='WORK' && user.role.name()=='MASTER') { $><a class="btn btn-info mb10 mr5 notification" data-note-style="info" data-note-stack="stack_bottom_right" href="#" onclick="taskAction('complete_task', event)">Выполнено</a><$ } $>
                         <$ if (task.status && task.status.name()=='WORK' && user.role.name()=='MASTER') { $><a class="btn btn-info mb10 mr5 notification" data-note-style="info" data-note-stack="stack_bottom_right" href="#" onclick="taskAction('return_task', event)">Вернуть</a><$ } $>
                         <$ if (task.status && task.status.name()=='COMPLETE' && user.role.name()=='MASTER') { $><a class="btn btn-info mb10 mr5 notification" data-note-style="info" data-note-stack="stack_bottom_right" href="#" onclick="taskAction('resume_task', event)">Возобновить</a><$ } $>

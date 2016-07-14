@@ -398,6 +398,12 @@ public class EndPoint extends AbstractEndPoint implements AutoCloseable {
         return templateManager.eval("/edit_task.html", bindings);
     }
 
+    @GET  @Path("/tasks/{id}/copy")  @Produces(HTML_TYPE)
+    public String getCopyTask(@Context HttpServletRequest request, @PathParam("id") Integer id) throws Exception
+    {
+        return getEditTask(request, id);
+    }
+
     @POST  @Path("/tasks/{id}/edit")  @Produces(JSON_TYPE)
     public ApiResponse postEditTask(@Context HttpServletRequest request,
                                     @PathParam("id") Integer id, @FormParam("device") Integer deviceId, @FormParam("price") int price,
@@ -439,6 +445,15 @@ public class EndPoint extends AbstractEndPoint implements AutoCloseable {
         checkNotNull(id, "id");
         User user = checkRights(request, ADMIN);
         if (!dataAccess.stopTask(id))  throw new ClientException("Невозможно остановить задачу");
+        return ApiResponse.success();
+    }
+
+    @POST  @Path("/close_task")  @Produces(JSON_TYPE)
+    public ApiResponse postCloseTask(@Context HttpServletRequest request, @FormParam("id") Integer id) throws Exception
+    {
+        checkNotNull(id, "id");
+        User user = checkRights(request, ADMIN);
+        if (!dataAccess.closeTask(id))  throw new ClientException("Невозможно удалить задачу");
         return ApiResponse.success();
     }
 

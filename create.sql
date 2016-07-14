@@ -76,10 +76,11 @@ create table task (
   time_limit int not null default 0,
   title varchar(1000) not null,
   description text not null,
-  status enum('stop', 'start') not null default 'stop',
+  status enum('stop', 'start', 'close') not null default 'stop',
   created timestamp not null default current_timestamp,
   started timestamp null,
   stopped timestamp null,
+  closed  timestamp null,
   creator_id int not null,
 
   foreign key (device_id) references device_type(id),

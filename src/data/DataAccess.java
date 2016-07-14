@@ -249,7 +249,8 @@ public class DataAccess {
     {
         StringBuilder query = new StringBuilder();
         query.append("select "+TOTAL_TASK_FIELDS+" from task left join master_task on task_id=task.id and master_task.status='"+CONFIRM+"' ");
-        appendCondition(query, "created", startDate, endDate, true);
+        query.append("where task.status <> '"+CLOSE+"' ");
+        appendCondition(query, "created", startDate, endDate, false);
         query.append("group by " + TASK_FIELDS + " ");
         query.append("order by id limit 1000");
 
@@ -287,8 +288,9 @@ public class DataAccess {
     {
         StringBuilder query = new StringBuilder("select "+MASTER_TASK_FIELDS+", login " +
                                                 "from task inner join master_task on task_id=task.id " +
-                                                "left join user on master_task.master_id=user.id ");
-        appendCondition(query, "taken", startDate, endDate, true);
+                                                "left join user on master_task.master_id=user.id " +
+                                                "where task.status <> '"+CLOSE+"' ");
+        appendCondition(query, "taken", startDate, endDate, false);
         query.append("order by id limit 1000");
 
         try (UtilConnection con = new UtilConnection(dataSource.getConnection());
@@ -432,6 +434,7 @@ public class DataAccess {
 
     private static final String START = TaskStatus.START.name().toLowerCase();
     private static final String STOP = TaskStatus.STOP.name().toLowerCase();
+    private static final String CLOSE = TaskStatus.CLOSE.name().toLowerCase();
     private static final String WORK = MasterTaskStatus.WORK.name().toLowerCase();
     private static final String COMPLETE = MasterTaskStatus.COMPLETE.name().toLowerCase();
     private static final String CONFIRM = MasterTaskStatus.CONFIRM.name().toLowerCase();
@@ -445,6 +448,13 @@ public class DataAccess {
     public boolean stopTask(int taskId) throws SQLException  {
         try (UtilConnection con = new UtilConnection(dataSource.getConnection()))  {
             return con.executeUpdateOneOrZero("update task set status='"+STOP+"', stopped=current_timestamp() where id=? and status='"+START+"'", taskId);
+        }
+    }
+
+    public boolean closeTask(int taskId) throws SQLException  {
+        try (UtilConnection con = new UtilConnection(dataSource.getConnection()))  {
+            return con.executeUpdateOneOrZero("update task set status='"+CLOSE+"', closed=current_timestamp() where id=? and status='"+STOP+"'" +
+                                              " and not exists(select 1 from master_task where task_id=? and status<>'"+CONFIRM+"')", taskId, taskId);
         }
     }
 
