@@ -111,7 +111,7 @@
                                             <td>${getStatus(tasks[i].status)}</td>
                                             <td>${tasks[i].taken ? dateFormat.format(tasks[i].taken) : ""}</td>
                                             <$  }  $>
-                                            <td>${tasks[i].title}</td>
+                                            <td><a href="/tasks/${tasks[i].id + (path.endsWith('/master') ? '/'+tasks[i].masterId: '')}">${tasks[i].title}</a></td>
                                             <td class="w175">${getDeviceTitle(tasks[i].deviceId)}</td>
                                             <td>${tasks[i].price}</td>
                                             <$ if (path.endsWith('/all')) { $><td>${tasks[i].created ? dateFormat.format(tasks[i].created) : ""}</td><$ } $>

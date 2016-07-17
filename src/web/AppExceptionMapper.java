@@ -40,6 +40,7 @@ public class AppExceptionMapper extends AbstractEndPoint implements ExceptionMap
         String clientMessage = error instanceof ClientException ? error.getMessage() : "Внутренняя ошибка сервера";
         boolean unauthorized = error instanceof ClientException && error.getMessage() == UNAUTHORIZED;
         boolean denied = error instanceof ClientException && error.getMessage() == DENIED;
+        boolean peaceful = error instanceof ClientException && ((ClientException) error).peaceful;
         if (servletRequest.getMethod().equals("GET"))
         {
             if (denied) {
@@ -48,6 +49,7 @@ public class AppExceptionMapper extends AbstractEndPoint implements ExceptionMap
             try  {
                 Bindings bindings = createBindings(servletRequest, (User)servletRequest.getSession().getAttribute("user"));
                 bindings.put("error", clientMessage);
+                bindings.put("peaceful", peaceful);
                 String templatePath = unauthorized ? "/login.html" : "/error.html";
                 String result = templateManager.eval(templatePath, bindings);
                 return response.entity(result).type(HTML_TYPE).build();

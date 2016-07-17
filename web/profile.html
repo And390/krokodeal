@@ -45,7 +45,7 @@
                         <div class="panel-body">
                             <form role="form" class="form-horizontal">
                                 <div class="form-group has-primary">
-                                    <label for="city" class="col-lg-3 control-label black">Город*</label>
+                                    <label for="city" class="col-lg-3 control-label black">Город<span class="required">*</span></label>
                                     <div class="col-lg-8">
                                         <input id="city" type="text" class="form-control black" value="${master.city #h}">
                                     </div>
@@ -79,7 +79,7 @@
                                         <select id="device" class="form-control black">
                                             <option value=""></option>
                                             <$  for (var i=0, j=0; i < devices.length; i++)  if (devices[i].type=='phone')  {  $>
-                                            <option id="device_${devices[i].id}" value="${devices[i].id}">${devices[i].title}</option>
+                                            <option id="device_${devices[i].id}" value="${devices[i].id}">${devices[i].title.replace("телефон", "").replace("планшет", "")}</option>
                                             <$  }  $>
                                         </select>
                                     </div>
@@ -90,7 +90,7 @@
                                         <select id="tablet" class="form-control black">
                                             <option value=""></option>
                                             <$  for (var i=0, j=0; i < devices.length; i++)  if (devices[i].type=='tablet')  {  $>
-                                            <option id="device_${devices[i].id}" value="${devices[i].id}">${devices[i].title}</option>
+                                            <option id="device_${devices[i].id}" value="${devices[i].id}">${devices[i].title.replace("телефон", "").replace("планшет", "")}</option>
                                             <$  }  $>
                                         </select>
                                     </div>

@@ -10,3 +10,25 @@
 .panel-heading {
     height: 36px;
 }
+.required {
+    color: #ff0000;
+}
+.error-bar {
+    width: 1%;
+    display: table-cell;
+    box-sizing: border-box;
+
+    padding: 28px 28px;
+    text-align: center;
+    vertical-align: middle;
+
+    font-family: "Lato", Helvetica, Arial, sans-serif;
+    font-size: 1.2em;
+    font-weight: normal;
+    line-height: 1;
+
+    color: #e90f04;
+    background-color: #fed7d4;
+    border: 1px solid #fc5047;
+    border-radius: 5px;
+}

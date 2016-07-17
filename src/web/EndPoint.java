@@ -219,7 +219,7 @@ public class EndPoint extends AbstractEndPoint implements AutoCloseable {
                               @FormParam("devices") List<Integer> devices) throws Exception
     {
         User user = checkRights(request, MASTER);
-        checkInt(age, 1, 127, "age");
+        if (age != null)  checkInt(age, 1, 127, "age");
         dataAccess.updateMasterInfo(user.id, city, phone, male, age);
         dataAccess.updateMasterDevices(user.id, devices);
         return ApiResponse.success();
@@ -297,7 +297,7 @@ public class EndPoint extends AbstractEndPoint implements AutoCloseable {
         User user = checkRights(request, MASTER);
         //TODO возможно это лучше одним запросом сделать
         List<Integer> masterDevices =  dataAccess.loadMasterDevices(user.id);
-        if (masterDevices != null && masterDevices.isEmpty())  throw new ClientException("Вы не указали ни одного устройства в найстройках");
+        if (masterDevices != null && masterDevices.isEmpty())  throw new ClientException("Вы не указали ни одного устройства в найстройках", true);
         return getTasks(request, user, dataAccess.loadOpenTasks(TaskStatus.START, masterDevices, user.id), "/tasks.html");
     }
 

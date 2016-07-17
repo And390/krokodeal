@@ -38,11 +38,11 @@
           <ul class="nav sidebar-menu">
             <li class="sidebar-label pt35"></li>
             <$  if (user && user.role.name()=="MASTER")  {  $>
-            <li><a href="/profile"><span class="fa fa-gears"></span><span class="sidebar-title">О себе</span></a></li>
             <li><a href="/tasks/open"><span class="glyphicon glyphicon-check"></span><span class="sidebar-title">Задачи</span></a></li>
             <li><a href="/finance"><span class="fa fa-shopping-basket"></span><span class="sidebar-title">Финансы</span></a></li>
             <li><a href="/faq"><span class="fa fa-wechat"></span><span class="sidebar-title">FAQ</span></a></li>
             <li><a href="/feedback"><span class="fa fa-comment-o"></span><span class="sidebar-title">Обратная связь</span></a></li>
+            <li><a href="/profile"><span class="fa fa-gears"></span><span class="sidebar-title">О себе</span></a></li>
             <$  }  $>
             <$  if (user && user.role.name()=="ADMIN")  {  $>
             <li><a href="/tasks/create"><span class="glyphicon glyphicon-edit"></span><span class="sidebar-title">Создание задачи</span></a></li>
