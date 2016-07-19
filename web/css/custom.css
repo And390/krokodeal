@@ -13,7 +13,7 @@
 .required {
     color: #ff0000;
 }
-.error-bar {
+.notification-bar {
     width: 1%;
     display: table-cell;
     box-sizing: border-box;
@@ -27,8 +27,25 @@
     font-weight: normal;
     line-height: 1;
 
+    border: 1px solid;
+    border-radius: 5px;
+}
+.notification-bar.error {
     color: #e90f04;
     background-color: #fed7d4;
-    border: 1px solid #fc5047;
-    border-radius: 5px;
+    border-color: #fc5047;
+}
+.notification-bar.success {
+    background-color: #F0FEE9;
+    border-color: #A5D491;
+    color: #6fc33b;
+}
+#notificationHolder {
+    position: fixed;
+    z-index: 2000;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 16px;
+    display: none;
 }

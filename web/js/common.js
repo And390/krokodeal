@@ -92,22 +92,38 @@ var http =
 };
 
 
+function notify(e, className, fadeOut, logMsg)
+{
+    var msg = $('#notificationMessage');
+    var holder = $('#notificationHolder');
+    if (msg.length && holder.length)  {
+        msg.text(e.toString());
+        msg.attr('class', 'notification-bar '+className);
+        holder.fadeIn(400, function() {
+            holder.fadeOut(fadeOut);
+        });
+        holder.click(function() {
+            holder.stop();
+            holder.hide();
+        })
+    }
+    else  alert(e.toString());
+    console.error(logMsg ? logMsg : e);
+}
+
 function error(e, logError)
 {
-    var element = document.getElementById("error");
-    if (element)  {  element.style.display = "block";  element.innerText = e.toString();  }
-    else  alert(e.toString());
-    console.error(logError ? logError : e);
+    notify(e, 'error', 10000, logError);
 }
 
 function success(e)
 {
-    error(e);
+    notify(e, 'success', 2600);
 }
 
 function hideError()
 {
-    var element = document.getElementById("error");
+    var element = document.getElementById("errorMessage");
     if (element)  element.style.display = "none";
 }
 
