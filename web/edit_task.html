@@ -49,6 +49,17 @@
                                     </div>
                                 </div>
                                 <div class="form-group has-primary">
+                                    <label for="type" class="col-lg-3 control-label black">Тип</label>
+                                    <div class="col-lg-8">
+                                        <select id="type" class="form-control black">
+                                            <option value="" ${!task || !task.type ? " selected" : ""}></option>
+                                            <$  for (var i=0; i < types.length; i++)  {  $>
+                                            <option value="${types[i].id}" ${task && task.type && task.type.id==types[i].id ? " selected" : ""}>${types[i].title}</option>
+                                            <$  }  $>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group has-primary">
                                     <label for="device" class="col-lg-3 control-label black">Устройство</label>
                                     <div class="col-lg-8">
                                         <select id="device" class="form-control black">
@@ -120,6 +131,9 @@
             try {
                 var params = {};
                 params.title = document.getElementById("title").value;
+                var taskTypes = document.getElementById("type");
+                var taskType = taskTypes.options[taskTypes.selectedIndex];
+                if (taskType && !isNaN(taskType.value))  params.type = taskType.value;
                 var deviceTypes = document.getElementById("device");
                 var deviceType = deviceTypes.options[deviceTypes.selectedIndex];
                 if (!deviceType)  throw "Выберите устройство";

@@ -14,9 +14,8 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -179,6 +178,18 @@ public class DataAccess {
         }
     }
 
+    // TODO need check and update cache here
+
+    public Task.Type[] getTaskTypes()
+    {
+        return taskTypeCache.values().toArray(new Task.Type[0]);
+    }
+
+    public Task.Type getTaskType(int id)
+    {
+        return taskTypeCache.get(id);
+    }
+
     public void updateMasterInfo(int userId, String city, String phone, Boolean male, Integer age) throws SQLException
     {
         try (UtilConnection con = new UtilConnection(dataSource.getConnection()))
@@ -257,9 +268,10 @@ public class DataAccess {
         try (UtilConnection con = new UtilConnection(dataSource.getConnection());
              ResultSet resultSet = con.executeQuery(query.toString(), params(startDate, endDate)))
         {
+            TaskTypeLoader typeLoader = taskTypeLoader(con);
             List<Task> result = new ArrayList<>();
             while (resultSet.next())  {
-                result.add(mapTotalTask(resultSet));
+                result.add(mapTotalTask(resultSet, typeLoader));
             }
             return result;
         }
@@ -296,9 +308,10 @@ public class DataAccess {
         try (UtilConnection con = new UtilConnection(dataSource.getConnection());
              ResultSet resultSet = con.executeQuery(query.toString(), params(startDate, endDate)))
         {
+            TaskTypeLoader typeLoader = taskTypeLoader(con);
             List<MasterTask> result = new ArrayList<>();
             while (resultSet.next())  {
-                result.add(mapMasterTaskWithLogin(resultSet));
+                result.add(mapMasterTaskWithLogin(resultSet, typeLoader));
             }
             return result;
         }
@@ -315,7 +328,7 @@ public class DataAccess {
         try (UtilConnection con = new UtilConnection(dataSource.getConnection());
              ResultSet resultSet = con.executeQuery(query.toString(), excludeNulls(masterId, status.name().toLowerCase(), confirmStartDate, confirmEndDate)))
         {
-            return loadMasterTasks(resultSet);
+            return loadMasterTasks(resultSet, con);
         }
     }
 
@@ -331,7 +344,7 @@ public class DataAccess {
                      " and (task.count_limit=0 or task.count_limit > (select count(*) from master_task where task_id=task.id)) " +
                      "order by id limit 1000", masterId, status.name().toLowerCase(), devices))
         {
-            return loadMasterTasks(resultSet);
+            return loadMasterTasks(resultSet, con);
         }
     }
 
@@ -342,26 +355,29 @@ public class DataAccess {
                      "select "+MASTER_TASK_FIELDS+" from task left join master_task on task_id=task.id " +
                      "where task.time_limit>0 and master_task.status='"+WORK+"'"))
         {
+            TaskTypeLoader typeLoader = taskTypeLoader(con);
             while (resultSet.next()) {
-                consumer.accept(mapMasterTask(resultSet));
+                consumer.accept(mapMasterTask(resultSet, typeLoader));
             }
         }
     }
 
-    private List<Task> loadTasks(ResultSet resultSet) throws SQLException
+    private List<Task> loadTasks(ResultSet resultSet, UtilConnection con) throws SQLException
     {
+        TaskTypeLoader typeLoader = taskTypeLoader(con);
         List<Task> result = new ArrayList<>();
         while (resultSet.next())  {
-            result.add(mapTask(resultSet));
+            result.add(mapTask(resultSet, typeLoader));
         }
         return result;
     }
 
-    private List<MasterTask> loadMasterTasks(ResultSet resultSet) throws SQLException
+    private List<MasterTask> loadMasterTasks(ResultSet resultSet, UtilConnection con) throws SQLException
     {
+        TaskTypeLoader typeLoader = taskTypeLoader(con);
         List<MasterTask> result = new ArrayList<>();
         while (resultSet.next())  {
-            result.add(mapMasterTask(resultSet));
+            result.add(mapMasterTask(resultSet, typeLoader));
         }
         return result;
     }
@@ -377,7 +393,7 @@ public class DataAccess {
                                                             (status != null ? " and status='"+status.name().toLowerCase()+"'" : ""), taskId))
                 {
                     if (!resultSet.next())  return null;
-                    task = mapAdminTask(resultSet);
+                    task = mapAdminTask(resultSet, taskTypeLoader(con));
                 }
             }
             else
@@ -388,7 +404,7 @@ public class DataAccess {
                                                             (status != null ? " and status='"+status.name().toLowerCase()+"'" : ""), taskId, masterId, taskId))
                 {
                     if (!resultSet.next())  return null;
-                    task = mapMasterTask(resultSet);
+                    task = mapMasterTask(resultSet, taskTypeLoader(con));
                 }
 
                 task.messages = new ArrayList<>();
@@ -506,21 +522,21 @@ public class DataAccess {
         }
     }
 
-    public void createTask(int userId, int deviceId, int price, int countLimit, int timeLimit, String title, String description) throws SQLException
+    public void createTask(int userId, Integer typeId, int deviceId, int price, int countLimit, int timeLimit, String title, String description) throws SQLException
     {
         try (UtilConnection con = new UtilConnection(dataSource.getConnection()))
         {
-            con.executeUpdateOne("insert into task (creator_id, device_id, price, count_limit, time_limit, title, description) values (?,?,?,?,?,?,?)",
-                    userId, deviceId, price, countLimit, timeLimit, title, description);
+            con.executeUpdateOne("insert into task (creator_id, type_id, device_id, price, count_limit, time_limit, title, description) values (?,?,?,?,?,?,?,?)",
+                    userId, typeId, deviceId, price, countLimit, timeLimit, title, description);
         }
     }
 
-    public void updateTask(int taskId, int deviceId, int price, int countLimit, int timeLimit, String title, String description) throws SQLException
+    public void updateTask(int taskId, Integer typeId, int deviceId, int price, int countLimit, int timeLimit, String title, String description) throws SQLException
     {
         try (UtilConnection con = new UtilConnection(dataSource.getConnection()))
         {
-            con.executeUpdateOne("update task set device_id=?, price=?, count_limit=?, time_limit=?, title=?, description=? where id=?",
-                    deviceId, price, countLimit, timeLimit, title, description, taskId);
+            con.executeUpdateOne("update task set device_id=?, type_id=?, price=?, count_limit=?, time_limit=?, title=?, description=? where id=?",
+                    deviceId, typeId, price, countLimit, timeLimit, title, description, taskId);
         }
     }
 
@@ -565,15 +581,101 @@ public class DataAccess {
         }
     }
 
-    private static final String TASK_FIELDS = "task.id, task.device_id, task.price, task.title, task.description, task.status, task.created, task.started, task.stopped";
+    private final Object taskTypeCacheMonitor = new Object();
+    private volatile HashMap<Integer, Task.Type> taskTypeCache = null;
+    private volatile LocalDateTime taskTypeCacheLastUpdate = null;
+
+    private static final int taskTypeCacheUpdatePeriod = 300;  //если элементы только добавляются, то можно вообще не перезагружать по расписанию
+
+    private Task.Type getTaskType(UtilConnection con, int id) throws SQLException  {
+        LocalDateTime lastUpdate = taskTypeCacheLastUpdate;
+        Task.Type type = lastUpdate==null || !lastUpdate.isAfter(LocalDateTime.now().minusSeconds(taskTypeCacheUpdatePeriod)) ? null
+                : taskTypeCache.get(id);
+        if (type == null) {
+            synchronized (taskTypeCacheMonitor) {  // double checking
+                lastUpdate = taskTypeCacheLastUpdate;
+                type = lastUpdate==null || !lastUpdate.isAfter(LocalDateTime.now().minusSeconds(taskTypeCacheUpdatePeriod)) ? null
+                        : taskTypeCache.get(id);
+                if (type == null) {
+                    //  reload cache
+                    HashMap<Integer, Task.Type> cache = new HashMap<>();
+                    try (ResultSet rs = con.executeQuery("select id, title from task_type")) {
+                        while (rs.next()) {
+                            type = new Task.Type();
+                            type.id = rs.getInt(1);
+                            type.title = rs.getString(2);
+                            cache.put(id, type);
+                        }
+                    }
+                    taskTypeCache = cache;
+
+                    //  must be found in loaded cache
+                    type = cache.get(id);
+                    if (type == null) {
+                        throw new IllegalStateException("Task type is not found: " + id);
+                    }
+                }
+            }
+        }
+        return type;
+    }
+
+    private interface TaskTypeLoader {
+        Task.Type get(int id) throws SQLException;
+    }
+
+    private TaskTypeLoader taskTypeLoader(UtilConnection con) {
+        return new TaskTypeLoader() {
+            HashMap<Integer, Task.Type> cache = taskTypeCache;
+            LocalDateTime lastUpdate = taskTypeCacheLastUpdate;
+            boolean reloaded = false;
+
+            public Task.Type get(int id) throws SQLException {
+                Task.Type type = lastUpdate==null || !lastUpdate.isAfter(LocalDateTime.now().minusSeconds(taskTypeCacheUpdatePeriod))
+                        ? null : cache.get(id);
+                if (type == null && !reloaded) {
+                    synchronized (taskTypeCacheMonitor) {  // double checking
+                        lastUpdate = taskTypeCacheLastUpdate;
+                        cache = taskTypeCache;
+                        type = lastUpdate==null || !lastUpdate.isAfter(LocalDateTime.now().minusSeconds(taskTypeCacheUpdatePeriod))
+                                ? null : cache.get(id);
+                        if (type == null) {
+                            //  reload cache
+                            cache = new HashMap<>();
+                            try (ResultSet rs = con.executeQuery("select id, title from task_type")) {
+                                while (rs.next()) {
+                                    type = new Task.Type();
+                                    type.id = rs.getInt(1);
+                                    type.title = rs.getString(2);
+                                    cache.put(type.id, type);
+                                }
+                            }
+                            taskTypeCache = cache;
+                            taskTypeCacheLastUpdate = lastUpdate = LocalDateTime.now();
+                            reloaded = true;
+
+                            //  must be found in loaded cache
+                            type = cache.get(id);
+                        }
+                    }
+                }
+                if (type == null)  throw new IllegalStateException("Task type is not found: " + id);
+                return type;
+            }
+        };
+    }
+
+    private static final String TASK_FIELDS = "task.id, task.type_id, task.device_id, task.price, task.title, task.description, task.status, task.created, task.started, task.stopped";
     private static final String ADMIN_TASK_FIELDS = TASK_FIELDS + ", task.count_limit, task.time_limit";
     private static final String TOTAL_TASK_FIELDS = ADMIN_TASK_FIELDS+", count(master_task.task_id)";
     private static final String MASTER_TASK_FIELDS = TASK_FIELDS+", task.time_limit, master_task.master_id, master_task.status, master_task.taken, master_task.completed, master_task.confirmed";
 
-    private <T extends Task> T mapTask(ResultSet resultSet, T task) throws SQLException
+    private <T extends Task> T mapTask(ResultSet resultSet, T task, TaskTypeLoader typeLoader) throws SQLException
     {
         int i = 0;
         task.id = resultSet.getInt(++i);
+        int typeId = resultSet.getInt(++i);
+        task.type = resultSet.wasNull() ? null : typeLoader.get(typeId);
         task.deviceId = resultSet.getInt(++i);
         task.price = resultSet.getInt(++i);
         task.title = resultSet.getString(++i);
@@ -585,32 +687,32 @@ public class DataAccess {
         return task;
     }
 
-    private Task mapTask(ResultSet resultSet) throws SQLException
+    private Task mapTask(ResultSet resultSet, TaskTypeLoader typeLoader) throws SQLException
     {
-        return mapTask(resultSet, new Task());
+        return mapTask(resultSet, new Task(), typeLoader);
     }
 
-    private Task mapAdminTask(ResultSet resultSet) throws SQLException
+    private Task mapAdminTask(ResultSet resultSet, TaskTypeLoader typeLoader) throws SQLException
     {
-        Task task = mapTask(resultSet);
-        int i = 9;
+        Task task = mapTask(resultSet, typeLoader);
+        int i = 10;
         task.countLimit = resultSet.getInt(++i);
         task.timeLimit = resultSet.getInt(++i);
         return task;
     }
 
-    private Task mapTotalTask(ResultSet resultSet) throws SQLException
+    private Task mapTotalTask(ResultSet resultSet, TaskTypeLoader typeLoader) throws SQLException
     {
-        Task task = mapAdminTask(resultSet);
-        int i = 11;
+        Task task = mapAdminTask(resultSet, typeLoader);
+        int i = 12;
         task.confirmedCount = resultSet.getInt(++i);
         return task;
     }
 
-    private MasterTask mapMasterTask(ResultSet resultSet) throws SQLException
+    private MasterTask mapMasterTask(ResultSet resultSet, TaskTypeLoader typeLoader) throws SQLException
     {
-        MasterTask task = mapTask(resultSet, new MasterTask());
-        int i = 9;
+        MasterTask task = mapTask(resultSet, new MasterTask(), typeLoader);
+        int i = 10;
         task.timeLimit = resultSet.getInt(++i);
         task.masterId = resultSet.getInt(++i);
         String status = resultSet.getString(++i);
@@ -621,10 +723,10 @@ public class DataAccess {
         return task;
     }
 
-    private MasterTask mapMasterTaskWithLogin(ResultSet resultSet) throws SQLException
+    private MasterTask mapMasterTaskWithLogin(ResultSet resultSet, TaskTypeLoader typeLoader) throws SQLException
     {
-        MasterTask task = mapMasterTask(resultSet);
-        int i = 15;
+        MasterTask task = mapMasterTask(resultSet, typeLoader);
+        int i = 16;
         task.masterLogin = resultSet.getString(++i);
         return task;
     }

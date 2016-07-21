@@ -53,6 +53,7 @@
                 <div class="panel-body form-horizontal">
                     <div class="col-md-12"><p>${task.description}</p></div>
                     <div class="col-md-2"><p>Цена</p></div>  <div class="col-md-9"><p>${task.price} руб.</p></div>
+                    <div class="col-md-2"><p>Тип задачи</p></div>  <div class="col-md-9"><p>${task.type ? task.type.title : '&nbsp;'}</p></div>
                     <div class="col-md-2"><p>Тип устройства</p></div>  <div class="col-md-9"><p>&nbsp;</p></div>
                  	<!--div class="col-md-2"><p>Описание</p></div>  <div class="col-md-9"><p>${task.description}</p></div-->
                     <$  var taskStates = {  START: "запущено", STOP: "остановлена", CLOSE: "удалена"  };  $>

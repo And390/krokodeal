@@ -88,6 +88,7 @@
                                             <th>Дата взятия</th>
                                             <$  }  $>
                                             <th>Название задачи</th>
+                                            <th>Тип задачи</th>
                                             <th>Тип устройств</th>
                                             <th>Цена выполнения</th>
                                             <$ if (path.endsWith('/all')) { $><th>Дата создания</th><$ } $>
@@ -112,6 +113,7 @@
                                             <td>${tasks[i].taken ? dateFormat.format(tasks[i].taken) : ""}</td>
                                             <$  }  $>
                                             <td><a href="/tasks/${tasks[i].id + (path.endsWith('/master') ? '/'+tasks[i].masterId: '')}">${tasks[i].title}</a></td>
+                                            <td>${tasks[i].type ? tasks[i].type.title : ""}</td>
                                             <td class="w175">${getDeviceTitle(tasks[i].deviceId)}</td>
                                             <td>${tasks[i].price}</td>
                                             <$ if (path.endsWith('/all')) { $><td>${tasks[i].created ? dateFormat.format(tasks[i].created) : ""}</td><$ } $>

@@ -95,6 +95,17 @@
                                         </select>
                                     </div>
                                 </div>
+                                <div class="form-group has-primary">
+                                    <label for="computer" class="col-lg-3 control-label black">Компьютер</label>
+                                    <div class="col-lg-8">
+                                        <select id="computer" class="form-control black">
+                                            <option value=""></option>
+                                            <$  for (var i=0, j=0; i < devices.length; i++)  if (devices[i].type=='desktop')  {  $>
+                                            <option id="device_${devices[i].id}" value="${devices[i].id}">${devices[i].title}</option>
+                                            <$  }  $>
+                                        </select>
+                                    </div>
+                                </div>
                                 <div class="form-group">
                                     <label class="col-lg-3 control-label"></label>
                                     <div class="col-lg-8">
@@ -197,6 +208,7 @@
         for (var i=0; i<masterDevicesId.length; i++)  {
             if (allDevices[masterDevicesId[i]] && allDevices[masterDevicesId[i]].type=='phone')  $('#device').val(masterDevicesId[i]);
             if (allDevices[masterDevicesId[i]] && allDevices[masterDevicesId[i]].type=='tablet')  $('#tablet').val(masterDevicesId[i]);
+            if (allDevices[masterDevicesId[i]] && allDevices[masterDevicesId[i]].type=='computer')  $('#computer').val(masterDevicesId[i]);
         }
 
         $('#submitAbout').click(function(event) {
@@ -212,6 +224,7 @@
             params.devices = [];
             if ($('#device').val())  params.devices.push($('#device').val());
             if ($('#tablet').val())  params.devices.push($('#tablet').val());
+            if ($('#computer').val())  params.devices.push($('#computer').val());
             if (!params.devices.length)  {  error("Укажите устройство или планшет");  return;  }
             action("profile_info", params);
         });

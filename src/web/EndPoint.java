@@ -363,17 +363,19 @@ public class EndPoint extends AbstractEndPoint implements AutoCloseable {
     {
         User user = checkRights(request, ADMIN);
         Bindings bindings = createBindings(request, user);
+        bindings.put("types", dataAccess.getTaskTypes());
         bindings.put("devices", dataAccess.loadDevices());
         bindings.put("task", null);
         return templateManager.eval("/edit_task.html", bindings);
     }
 
     @POST  @Path("/tasks/create")  @Produces(JSON_TYPE)
-    public ApiResponse postCreateTask(@Context HttpServletRequest request,
+    public ApiResponse postCreateTask(@Context HttpServletRequest request, @FormParam("type") Integer typeId,
                                       @FormParam("device") Integer deviceId, @FormParam("price") int price,
                                       @FormParam("count") Integer countLimit, @FormParam("time") Integer timeLimit,
                                       @FormParam("title") String title, @FormParam("description") String description) throws Exception
     {
+        if (typeId != null && dataAccess.getTaskType(typeId) == null)  throw new ClientException("Wrong typeId: "+typeId);
         checkNotNull(deviceId, "deviceId");
         checkPositive(price, "price");
         if (countLimit != null)  checkPositive(countLimit, "countLimit");
@@ -381,7 +383,7 @@ public class EndPoint extends AbstractEndPoint implements AutoCloseable {
         checkNotEmpty(title, "title");
         checkNotEmpty(description, "description");
         User user = checkRights(request, ADMIN);
-        dataAccess.createTask(user.id, deviceId, price, countLimit != null ? countLimit : 0, timeLimit != null ? timeLimit : 0, title, description);
+        dataAccess.createTask(user.id, typeId, deviceId, price, countLimit != null ? countLimit : 0, timeLimit != null ? timeLimit : 0, title, description);
         return ApiResponse.success();
     }
 
@@ -393,6 +395,7 @@ public class EndPoint extends AbstractEndPoint implements AutoCloseable {
         Task task = dataAccess.loadTask(id, null, null);
         if (task==null)  throw new ClientException("Задача не существует");  // TODO 404 not found
         Bindings bindings = createBindings(request, user);
+        bindings.put("types", dataAccess.getTaskTypes());
         bindings.put("devices", dataAccess.loadDevices());
         bindings.put("task", task);
         return templateManager.eval("/edit_task.html", bindings);
@@ -406,11 +409,13 @@ public class EndPoint extends AbstractEndPoint implements AutoCloseable {
 
     @POST  @Path("/tasks/{id}/edit")  @Produces(JSON_TYPE)
     public ApiResponse postEditTask(@Context HttpServletRequest request,
-                                    @PathParam("id") Integer id, @FormParam("device") Integer deviceId, @FormParam("price") int price,
+                                    @PathParam("id") Integer id, @FormParam("type") Integer typeId,
+                                    @FormParam("device") Integer deviceId, @FormParam("price") int price,
                                     @FormParam("count") Integer countLimit, @FormParam("time") Integer timeLimit,
                                     @FormParam("title") String title, @FormParam("description") String description) throws Exception
     {
         checkNotNull(id, "taskId");
+        if (typeId != null && dataAccess.getTaskType(typeId) == null)  throw new ClientException("Wrong typeId: "+typeId);
         checkNotNull(deviceId, "deviceId");
         checkPositive(price, "price");
         if (countLimit != null)  checkPositive(countLimit, "countLimit");
@@ -418,7 +423,7 @@ public class EndPoint extends AbstractEndPoint implements AutoCloseable {
         checkNotEmpty(title, "title");
         checkNotEmpty(description, "description");
         checkRights(request, ADMIN);
-        dataAccess.updateTask(id, deviceId, price, countLimit != null ? countLimit : 0, timeLimit != null ? timeLimit : 0, title, description);
+        dataAccess.updateTask(id, typeId, deviceId, price, countLimit != null ? countLimit : 0, timeLimit != null ? timeLimit : 0, title, description);
         return ApiResponse.success();
     }
 

@@ -31,7 +31,7 @@ character set utf8;
 create table device_type (
   id int primary key auto_increment,
   title varchar(1000) not null,
-  type enum('phone','tablet') not null
+  type enum('phone','tablet','desktop') not null
 )
 character set utf8;
 
@@ -68,8 +68,15 @@ create table feedback (
 )
 character set utf8;
 
+create table task_type (
+  id int primary key auto_increment,
+  title varchar(1000) not null
+)
+character set utf8;
+
 create table task (
   id int primary key auto_increment,
+  type_id int null,
   device_id int not null,
   price int not null,
   count_limit int not null default 0,
@@ -83,6 +90,7 @@ create table task (
   closed  timestamp null,
   creator_id int not null,
 
+  foreign key (type_id) references task_type(id),
   foreign key (device_id) references device_type(id),
   foreign key (creator_id) references user(id)
   ,index (created)
@@ -136,3 +144,4 @@ insert into device_type(title,type) values('Windows Phone / Mobile','phone');
 insert into device_type(title,type) values('планшет Android','tablet');
 insert into device_type(title,type) values('iPad','tablet');
 insert into device_type(title,type) values('планшет iOS','tablet');
+insert into device_type(title,type) values('Windows','desktop');
